@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mrs. Swarnambigai — Health Records | Dr. Kamakshi Memorial Hospital</title>
+<style>
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;min-height:100vh;overflow-x:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f6fa;color:#1a1a2e;font-size:16px;-webkit-text-size-adjust:100%}
+
+/* ── LAYOUT ── */
+.app{width:100%;max-width:960px;margin:0 auto;padding:12px}
+
+/* ── TOP BAR ── */
+.topbar{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.patient-info{display:flex;align-items:center;gap:12px}
+.avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0}
+.patient-name{font-size:16px;font-weight:700;color:#1a1a2e}
+.patient-meta{font-size:12px;color:#64748b;margin-top:3px;line-height:1.5}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:11px;padding:5px 10px;border-radius:20px;font-weight:600;display:inline-block}
+.badge-green{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.badge-red{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.badge-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.badge-purple{background:#faf5ff;color:#6b21a8;border:1px solid #e9d5ff}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.stat{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;text-align:center}
+.stat-label{font-size:10px;color:#64748b;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.stat-val{font-size:20px;font-weight:700;color:#1a1a2e}
+.stat-sub{font-size:10px;color:#94a3b8;margin-top:2px}
+
+/* ── CONTROLS ── */
+.controls{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.search-wrap{position:relative;width:100%}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.45;pointer-events:none}
+.search-wrap input{width:100%;padding:11px 10px 11px 34px;font-size:15px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#1a1a2e;outline:none;-webkit-appearance:none}
+.controls-row2{display:flex;gap:8px;flex-wrap:wrap}
+select,input[type=month]{flex:1;min-width:120px;padding:11px 12px;font-size:14px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#1a1a2e;outline:none;-webkit-appearance:none;appearance:none}
+.sort-btn{padding:11px 14px;font-size:13px;font-weight:600;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#6366f1;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center}
+
+/* ── TABS ── */
+.tabs{display:flex;margin-bottom:0;border-bottom:3px solid #e2e8f0}
+.tab{flex:1;padding:14px 8px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;display:block;color:#64748b;border-bottom:3px solid transparent;margin-bottom:-3px;background:#f8fafc;border-radius:10px 10px 0 0;-webkit-user-select:none;user-select:none;transition:color .15s,background .15s}
+.tab.active{color:#6366f1;border-bottom-color:#6366f1;background:#fff}
+
+/* ── TAB CONTENT ── */
+.tab-content{background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;padding:14px;margin-bottom:16px;min-height:200px}
+
+/* ── RECORDS ── */
+.month-label{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin:14px 0 8px;padding-left:2px}
+.record-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:10px;overflow:hidden}
+.record-card.open{border-color:#6366f1}
+.record-header{padding:14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.rtype{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.04em;flex-shrink:0;margin-top:2px}
+.rtype-lab{background:#eff6ff;color:#1d4ed8}
+.rtype-radiology{background:#faf5ff;color:#6b21a8}
+.rtype-echo{background:#fdf4ff;color:#86198f}
+.rtype-ecg{background:#fff7ed;color:#c2410c}
+.rtype-discharge{background:#fefce8;color:#854d0e}
+.rtype-surgery{background:#fef2f2;color:#991b1b}
+.rtitle{font-size:14px;font-weight:600;color:#1a1a2e;flex:1;line-height:1.4}
+.rmeta{font-size:12px;color:#64748b;margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;line-height:1.5}
+.tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{font-size:10px;background:#f1f5f9;color:#475569;padding:3px 8px;border-radius:20px;font-weight:500}
+.chevron{font-size:20px;color:#94a3b8;flex-shrink:0;transition:transform .2s;line-height:1;margin-top:2px}
+.open .chevron{transform:rotate(180deg)}
+.record-body{border-top:1px solid #f1f5f9;padding:14px;background:#fafbff}
+
+/* ── LAB GRID ── */
+.lab-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.lab-item{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lab-left .lname{font-size:13px;font-weight:600;color:#334155}
+.lab-left .lref{font-size:11px;color:#94a3b8;margin-top:2px}
+.lab-right{text-align:right;flex-shrink:0}
+.lval{font-size:15px;font-weight:700}
+.lval.normal{color:#16a34a}
+.lval.high{color:#d97706}
+.lval.low{color:#dc2626}
+.lunit{font-size:10px;color:#94a3b8;font-weight:400}
+.lflag{font-size:10px;font-weight:700;margin-top:1px}
+.lflag.high{color:#d97706}
+.lflag.low{color:#dc2626}
+
+/* ── ECHO ── */
+.echo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.echo-item{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px}
+.echo-param{font-size:11px;color:#64748b;font-weight:600;margin-bottom:2px}
+.echo-val{font-size:14px;font-weight:700;color:#1a1a2e}
+.echo-section{font-size:11px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px;padding-bottom:4px;border-bottom:1px solid #e2e8f0}
+.morpho-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+.morpho-row:last-child{border-bottom:none}
+.morpho-name{color:#475569;font-weight:500}
+.morpho-status{font-size:11px;font-weight:700;color:#16a34a;background:#f0fdf4;padding:3px 8px;border-radius:20px}
+
+/* ── DISCHARGE ── */
+.ds-section{margin-bottom:14px}
+.ds-label{font-size:10px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.ds-content{font-size:13px;color:#334155;line-height:1.7;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px}
+.meds-table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0}
+.meds-table th{background:#f8fafc;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid #e2e8f0}
+.meds-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
+.meds-table tr:last-child td{border-bottom:none}
+.vitals-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.vital-item{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;text-align:center}
+.vital-label{font-size:10px;color:#94a3b8;font-weight:600;margin-bottom:3px}
+.vital-val{font-size:14px;font-weight:700;color:#1a1a2e}
+.warning-list{background:#fff;border:1px solid #fecdd3;border-radius:8px;padding:10px 14px}
+.warning-list li{font-size:13px;color:#7f1d1d;margin-bottom:6px;margin-left:16px;line-height:1.5}
+
+/* ── CT / ECG ── */
+.report-box{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;font-size:13px;line-height:1.8;color:#334155}
+.report-box strong{color:#1a1a2e;font-weight:600}
+.impression-box{background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:12px 16px;margin-top:10px}
+.impression-box .imp-label{font-size:10px;font-weight:700;color:#6b21a8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.impression-box li{font-size:13px;color:#3b0764;margin-bottom:6px;margin-left:16px;line-height:1.6}
+.ecg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ecg-item{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;text-align:center}
+.ecg-param{font-size:10px;color:#94a3b8;font-weight:600;margin-bottom:3px}
+.ecg-val{font-size:14px;font-weight:700;color:#1a1a2e}
+.ecg-result{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;color:#14532d;text-align:center}
+
+/* ── COMPARISON ── */
+.comp-wrap{width:100%}
+.comp-title{font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:10px}
+.flag-legend{display:flex;gap:12px;font-size:12px;color:#64748b;margin-bottom:14px;flex-wrap:wrap}
+.flag-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+.fd-normal{background:#16a34a}.fd-high{background:#d97706}.fd-low{background:#dc2626}
+.comp-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
+.comp-table{width:100%;border-collapse:collapse;font-size:13px}
+.comp-table th{background:#f8fafc;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;padding:10px 10px;border-bottom:2px solid #e2e8f0;text-align:left;white-space:nowrap}
+.comp-table td{padding:10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.comp-table tr:last-child td{border-bottom:none}
+.cval-normal{color:#16a34a;font-weight:700}
+.cval-high{color:#d97706;font-weight:700}
+.cval-low{color:#dc2626;font-weight:700}
+.test-name{font-weight:600;color:#334155}
+.test-ref{font-size:11px;color:#94a3b8}
+.section-divider{background:#f8fafc}
+.section-divider td{font-size:11px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid #e2e8f0}
+.no-result{text-align:center;padding:3rem;color:#94a3b8;font-size:14px}
+
+/* ── ADD FILES ── */
+.add-files-bar{background:#fff;border:2px dashed #c7d2fe;border-radius:12px;padding:18px;text-align:center;margin-bottom:12px}
+.add-files-bar input{display:none}
+.add-btn-label{font-size:14px;color:#6366f1;font-weight:600}
+.add-btn-label svg{vertical-align:middle;margin-right:6px}
+.add-hint{font-size:12px;color:#94a3b8;margin-top:6px}
+.added-file-notice{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;margin-bottom:10px}
+
+/* ── DESKTOP OVERRIDES ── */
+@media(min-width:640px){
+  .topbar{flex-direction:row;align-items:center;justify-content:space-between}
+  .stats{grid-template-columns:repeat(4,1fr)}
+  .controls{flex-direction:row;align-items:center}
+  .controls-row2{flex:1;flex-wrap:nowrap}
+  .search-wrap{flex:2}
+  .lab-grid{grid-template-columns:1fr 1fr}
+  .vitals-row{grid-template-columns:repeat(3,1fr)}
+  .ecg-grid{grid-template-columns:repeat(3,1fr)}
+  .tab{font-size:14px;padding:14px 24px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="patient-info">
+    <div class="avatar">SW</div>
+    <div>
+      <div class="patient-name">Mrs. Swarnambigai</div>
+      <div class="patient-meta">Female, 42 Yrs &nbsp;·&nbsp; Patient ID: 448209 &nbsp;·&nbsp; Blood Group: B+</div>
+      <div class="patient-meta" style="margin-top:2px">📍 No F3 Gokulam Flats, Shree Puram, Gerugambakkam, Chennai – 600 112 &nbsp;·&nbsp; 📞 9444408002</div>
+    </div>
+  </div>
+  <div class="badges">
+    <span class="badge badge-blue">🏥 Dr. Kamakshi Memorial Hospital</span>
+    <span class="badge badge-green">B+ Blood Group</span>
+    <span class="badge badge-red">⚠️ Drug Allergy: RANTAC</span>
+    <span class="badge badge-purple">Ref: Dr. Rajkumar P</span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-label">Total Records</div><div class="stat-val">8</div><div class="stat-sub">From Dec 2022</div></div>
+  <div class="stat"><div class="stat-label">Lab Tests</div><div class="stat-val">25+</div><div class="stat-sub">CBC, LFT, Biochem…</div></div>
+  <div class="stat"><div class="stat-label">Procedures</div><div class="stat-val">1</div><div class="stat-sub">Excision Biopsy</div></div>
+  <div class="stat"><div class="stat-label">Last Visit</div><div class="stat-val" style="font-size:15px;padding-top:4px">24 Dec 2022</div><div class="stat-sub">Discharged</div></div>
+</div>
+
+<!-- ADD FILES BAR -->
+<div class="add-files-bar">
+  <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="handleFiles(this.files)"/>
+  <label class="add-btn-label" for="file-input">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Add New Records
+  </label>
+  <div class="add-hint">Drop PDFs or images here — lab reports, prescriptions, scan reports. They'll appear in your dashboard instantly.</div>
+</div>
+<div id="added-notice" style="display:none"></div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="search-input" placeholder="Search records, tests, doctors…" oninput="filterRecords()"/>
+  </div>
+  <div class="controls-row2">
+    <select id="type-filter" onchange="filterRecords()">
+      <option value="all">All types</option>
+      <option value="lab">Lab Report</option>
+      <option value="radiology">Radiology</option>
+      <option value="echo">Echocardiogram</option>
+      <option value="ecg">ECG</option>
+      <option value="discharge">Discharge Summary</option>
+      <option value="surgery">Surgery Note</option>
+    </select>
+    <input type="month" id="date-filter" onchange="filterRecords()" title="Filter by month"/>
+    <a href="#" id="sort-btn" class="sort-btn">⬆ Oldest First</a>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <a href="#" class="tab active" id="tab-btn-history">📋 Record History</a>
+  <a href="#" class="tab" id="tab-btn-comparison">📊 Lab Comparison</a>
+</div>
+
+<!-- HISTORY TAB -->
+<div id="tab-history" class="tab-content">
+  <div id="record-list"></div>
+  <div id="no-result" class="no-result" style="display:none">🔍 No records match your search.</div>
+</div>
+
+<!-- COMPARISON TAB -->
+<div id="tab-comparison" class="tab-content" style="display:none">
+  <div class="comp-wrap">
+  <div class="comp-title">Complete Lab Results — 22 Dec 2022</div>
+    <div class="flag-legend">
+      <span><span class="flag-dot fd-normal"></span>Normal</span>
+      <span><span class="flag-dot fd-high"></span>High / Elevated</span>
+      <span><span class="flag-dot fd-low"></span>Low</span>
+    </div>
+    <div class="comp-table-wrap">
+    <table class="comp-table">
+      <thead><tr><th style="min-width:200px">Test Name</th><th>Result</th><th>Unit</th><th>Reference Range</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr class="section-divider"><td colspan="5">🩸 Haematology — CBC</td></tr>
+        <tr><td><span class="test-name">Total WBC Count</span></td><td class="cval-normal">9,630</td><td class="test-ref">/uL</td><td class="test-ref">4000–10000</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Neutrophils</span></td><td class="cval-normal">65.5</td><td class="test-ref">%</td><td class="test-ref">40–80</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Lymphocytes</span></td><td class="cval-normal">28.0</td><td class="test-ref">%</td><td class="test-ref">20–40</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Eosinophils</span></td><td class="cval-normal">2.8</td><td class="test-ref">%</td><td class="test-ref">1–6</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Monocytes</span></td><td class="cval-normal">3.2</td><td class="test-ref">%</td><td class="test-ref">2–10</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Basophils</span></td><td class="cval-normal">0.5</td><td class="test-ref">%</td><td class="test-ref">0–1</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Haemoglobin</span></td><td class="cval-low">7.9</td><td class="test-ref">g/dL</td><td class="test-ref">12–15</td><td><span class="flag-dot fd-low"></span><strong style="color:#dc2626">LOW</strong></td></tr>
+        <tr><td><span class="test-name">PCV (Haematocrit)</span></td><td class="cval-low">28.4</td><td class="test-ref">%</td><td class="test-ref">36–46</td><td><span class="flag-dot fd-low"></span><strong style="color:#dc2626">LOW</strong></td></tr>
+        <tr><td><span class="test-name">RBC Count</span></td><td class="cval-normal">4.51</td><td class="test-ref">x10⁶/µL</td><td class="test-ref">3.8–4.8</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Platelet Count</span></td><td class="cval-normal">3,27,000</td><td class="test-ref">/µL</td><td class="test-ref">1,50,000–4,10,000</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">MCV</span></td><td class="cval-low">63.0</td><td class="test-ref">fL</td><td class="test-ref">83–101</td><td><span class="flag-dot fd-low"></span><strong style="color:#dc2626">LOW</strong></td></tr>
+        <tr><td><span class="test-name">MCH</span></td><td class="cval-low">17.5</td><td class="test-ref">pg</td><td class="test-ref">27–32</td><td><span class="flag-dot fd-low"></span><strong style="color:#dc2626">LOW</strong></td></tr>
+        <tr><td><span class="test-name">MCHC</span></td><td class="cval-low">27.8</td><td class="test-ref">%</td><td class="test-ref">31.5–34.5</td><td><span class="flag-dot fd-low"></span><strong style="color:#dc2626">LOW</strong></td></tr>
+        <tr><td><span class="test-name">RDW</span></td><td class="cval-high">19.4</td><td class="test-ref">%</td><td class="test-ref">11.6–14.0</td><td><span class="flag-dot fd-high"></span><strong style="color:#d97706">HIGH</strong></td></tr>
+
+        <tr class="section-divider"><td colspan="5">🩺 Coagulation</td></tr>
+        <tr><td><span class="test-name">PT Test</span></td><td class="cval-normal">13.0</td><td class="test-ref">secs</td><td class="test-ref">8.87–13.15</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">INR</span></td><td class="cval-normal">1.19</td><td class="test-ref">—</td><td class="test-ref">0.79–1.20</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">APTT Test</span></td><td class="cval-normal">28.4</td><td class="test-ref">secs</td><td class="test-ref">24.8–40.2</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+
+        <tr class="section-divider"><td colspan="5">🧪 Biochemistry</td></tr>
+        <tr><td><span class="test-name">HbA1C</span></td><td class="cval-normal">6.4</td><td class="test-ref">%</td><td class="test-ref">4–6 Normal / 6–7 Good</td><td><span class="flag-dot fd-high"></span>Good Control</td></tr>
+        <tr><td><span class="test-name">Glucose (Random)</span></td><td class="cval-high">166</td><td class="test-ref">mg/dL</td><td class="test-ref">&lt;140</td><td><span class="flag-dot fd-high"></span><strong style="color:#d97706">HIGH</strong></td></tr>
+        <tr><td><span class="test-name">eAG (Avg. Glucose)</span></td><td class="cval-high">137</td><td class="test-ref">mg/dL</td><td class="test-ref">—</td><td>Elevated</td></tr>
+        <tr><td><span class="test-name">Urea</span></td><td class="cval-normal">25</td><td class="test-ref">mg/dL</td><td class="test-ref">16.6–48.5</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Creatinine</span></td><td class="cval-high">0.7</td><td class="test-ref">mg/dL</td><td class="test-ref">0.51–0.95</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Bicarbonate</span></td><td class="cval-normal">27.8</td><td class="test-ref">mmol/L</td><td class="test-ref">21–28</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+
+        <tr class="section-divider"><td colspan="5">🫀 Liver Function Test (LFT)</td></tr>
+        <tr><td><span class="test-name">GGT</span></td><td class="cval-normal">24.9</td><td class="test-ref">U/L</td><td class="test-ref">6–42</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Total Bilirubin</span></td><td class="cval-normal">0.2</td><td class="test-ref">mg/dL</td><td class="test-ref">&lt;1.2</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Direct Bilirubin</span></td><td class="cval-normal">0.1</td><td class="test-ref">mg/dL</td><td class="test-ref">&lt;0.3</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">SGOT / AST</span></td><td class="cval-normal">10</td><td class="test-ref">IU/L</td><td class="test-ref">10–35</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">SGPT / ALT</span></td><td class="cval-normal">13</td><td class="test-ref">IU/L</td><td class="test-ref">10–35</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Alkaline Phosphatase</span></td><td class="cval-normal">84</td><td class="test-ref">U/L</td><td class="test-ref">35–105</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Total Protein</span></td><td class="cval-normal">7.3</td><td class="test-ref">g/dL</td><td class="test-ref">6.4–8.3</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Albumin</span></td><td class="cval-normal">4.4</td><td class="test-ref">g/dL</td><td class="test-ref">3.5–5.2</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Globulins</span></td><td class="cval-normal">2.9</td><td class="test-ref">g/dL</td><td class="test-ref">2.5–3.3</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">A/G Ratio</span></td><td class="cval-normal">1.5</td><td class="test-ref">—</td><td class="test-ref">1.1–1.5</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+
+        <tr class="section-divider"><td colspan="5">⚗️ Serum Electrolytes</td></tr>
+        <tr><td><span class="test-name">Sodium</span></td><td class="cval-normal">143</td><td class="test-ref">mmol/L</td><td class="test-ref">136–145</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Potassium</span></td><td class="cval-normal">4.3</td><td class="test-ref">mmol/L</td><td class="test-ref">3.5–5.1</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">Chloride</span></td><td class="cval-normal">103</td><td class="test-ref">mmol/L</td><td class="test-ref">98–107</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+
+        <tr class="section-divider"><td colspan="5">🦠 Thyroid & Serology</td></tr>
+        <tr><td><span class="test-name">TSH</span></td><td class="cval-normal">0.816</td><td class="test-ref">µIU/mL</td><td class="test-ref">0.27–4.2</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
+        <tr><td><span class="test-name">HIV</span></td><td class="cval-normal">Non Reactive (0.48)</td><td class="test-ref">S/CO</td><td class="test-ref">&lt;1.00</td><td><span class="flag-dot fd-normal"></span>Non Reactive</td></tr>
+        <tr><td><span class="test-name">HCV</span></td><td class="cval-normal">Non Reactive (0.10)</td><td class="test-ref">S/CO</td><td class="test-ref">&lt;1.00</td><td><span class="flag-dot fd-normal"></span>Non Reactive</td></tr>
+        <tr><td><span class="test-name">HBsAg</span></td><td class="cval-normal">Non Reactive (0.22)</td><td class="test-ref">S/CO</td><td class="test-ref">&lt;1.00</td><td><span class="flag-dot fd-normal"></span>Non Reactive</td></tr>
+        <tr><td><span class="test-name">Syphilis Ab</span></td><td class="cval-normal">Non Reactive (0.08)</td><td class="test-ref">S/CO</td><td class="test-ref">&lt;1.00</td><td><span class="flag-dot fd-normal"></span>Non Reactive</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div style="margin-top:14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 16px;font-size:13px;color:#7c2d12">
+      ⚠️ <strong>Key flags:</strong> Haemoglobin 7.9 g/dL (LOW — anaemia), PCV 28.4% (LOW), MCV 63 fL (LOW — microcytic), MCH 17.5 pg (LOW), MCHC 27.8% (LOW), RDW 19.4% (HIGH) — pattern consistent with <strong>Iron Deficiency Anaemia</strong>. Random Glucose 166 mg/dL (HIGH). All other parameters within normal limits.
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const RECORDS = [
+  {
+    id:1, type:"discharge", typeLabel:"Discharge Summary", date:"2022-12-24", month:"2022-12",
+    title:"Discharge Summary — Sebaceous Cyst Scalp (Surgical Oncology)",
+    doctor:"Dr. P. Rajkumar, Dr. Kathiresan, Dr. Vidya",
+    facility:"Dr. Kamakshi Memorial Hospital",
+    tags:["Discharge","Surgery","Sebaceous Cyst","Scalp","Surgical Oncology","IP.NO: 10201/2022"],
+    render: () => `
+      <div class="ds-section">
+        <div class="ds-label">Admission & Discharge</div>
+        <div class="vitals-row">
+          <div class="vital-item"><div class="vital-label">Date of Admission</div><div class="vital-val">24 Dec 2022</div></div>
+          <div class="vital-item"><div class="vital-label">Date of Surgery</div><div class="vital-val">24 Dec 2022</div></div>
+          <div class="vital-item"><div class="vital-label">Date of Discharge</div><div class="vital-val">24 Dec 2022</div></div>
+        </div>
+      </div>
+      <div class="ds-section">
+        <div class="ds-label">Diagnosis & Procedure</div>
+        <div class="ds-content"><strong>Diagnosis:</strong> Sebaceous Cyst Scalp<br><strong>Procedure:</strong> Excision Biopsy — 24.12.2022<br><strong>Anaesthesia:</strong> General Anaesthesia (GA)</div>
+      </div>
+      <div class="ds-section">
+        <div class="ds-label">Chief Complaints</div>
+        <div class="ds-content">42-year-old Mrs. Swarnambigai presented with complaints of swelling over occipital scalp, gradually increased in size, associated with discomfort in lying down. No history of pain / discharge from swelling / trauma / fall / injury to head. Local examination: Occipito parietal scalp swelling 2×4 cm with punctum.</div>
+      </div>
+      <div class="ds-section">
+        <div class="ds-label">Past History</div>
+        <div class="ds-content"><strong>Medical:</strong> Not a known case of DM / HTN / TB / BA<br><strong>Surgical:</strong> History of LSCS done 16 years back.<br><strong style="color:#991b1b">⚠️ Drug Allergy: RANTAC (Ranitidine)</strong></div>
+      </div>
+      <div class="ds-section">
+        <div class="ds-label">Vitals at Discharge</div>
+        <div class="vitals-row">
+          <div class="vital-item"><div class="vital-label">PR</div><div class="vital-val">85/min</div></div>
+          <div class="vital-item"><div class="vital-label">BP</div><div class="vital-val">130/70 mmHg</div></div>
+          <div class="vital-item"><div class="vital-label">Local Exam</div><div class="vital-val">Wound clean & healthy</div></div>
+        </div>
+      </div>
+      <div class="ds-section">
+        <div class="ds-label">Discharge Medications</div>
+        <table class="meds-table">
+          <thead><tr><th>Medicine</th><th>Morning</th><th>Afternoon</th><th>Night</th><th>Duration</th><th>Stop Date</th></tr></thead>
+          <tbody>
+            <tr><td>Tab. Taxim O 200mg</td><td>1</td><td>0</td><td>1</td><td>5 days</td><td>29.12.2022</td></tr>
+            <tr><td>Tab. Dolo 650mg</td><td>1</td><td>0</td><td>1</td><td>5 days</td><td>29.12.2022</td></tr>
+            <tr><td colspan="6">Neosporin Ointment — For local application (daily dressing)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ds-section">
+        <div class="ds-label">Follow-up</div>
+        <div class="ds-content">Review with Dr. Rajkumar (Surgical Oncologist) on <strong>31.12.2022</strong> in OPD.<br>Next Review Date: 31/12/2022</div>
+      </div>
+      <div class="ds-section">
+        <div class="ds-label">Warning Signs — Contact Emergency: 044-66300300 / 71200200</div>
+        <ul class="warning-list">
+          <li>Fever of 101°F or above</li>
+          <li>Discharge from the operated site</li>
+          <li>Pain and swelling</li>
+          <li>Other significant concerns</li>
+        </ul>
+      </div>
+    `
+  },
+  {
+    id:2, type:"lab", typeLabel:"Lab Report — CBC & Full Panel", date:"2022-12-22", month:"2022-12",
+    title:"Complete Blood Count, LFT, HbA1C, Electrolytes, Serology (7 pages)",
+    doctor:"Dr. Kala K M.D., DNB (Pathology)",
+    facility:"Dr. Kamakshi Memorial Hospital — Dept. of Laboratory Services",
+    tags:["CBC","Haemoglobin","WBC","Platelets","LFT","HbA1C","TSH","Electrolytes","HIV","HCV","HBsAg","LabNo: 1385172"],
+    render: () => `
+      <div class="echo-section">🩸 Haematology — CBC</div>
+      <div class="lab-grid">
+        <div class="lab-item"><div class="lab-left"><div class="lname">Haemoglobin</div><div class="lref">Ref: 12–15 g/dL</div></div><div class="lab-right"><div class="lval low">7.9 <span class="lunit">g/dL</span></div><div class="lflag low">▼ LOW</div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Total WBC Count</div><div class="lref">Ref: 4000–10000 /uL</div></div><div class="lab-right"><div class="lval normal">9,630 <span class="lunit">/uL</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">PCV (Haematocrit)</div><div class="lref">Ref: 36–46%</div></div><div class="lab-right"><div class="lval low">28.4 <span class="lunit">%</span></div><div class="lflag low">▼ LOW</div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">RBC Count</div><div class="lref">Ref: 3.8–4.8 x10⁶/µL</div></div><div class="lab-right"><div class="lval normal">4.51 <span class="lunit">x10⁶/µL</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Platelet Count</div><div class="lref">Ref: 1,50,000–4,10,000</div></div><div class="lab-right"><div class="lval normal">3,27,000 <span class="lunit">/µL</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">MCV</div><div class="lref">Ref: 83–101 fL</div></div><div class="lab-right"><div class="lval low">63.0 <span class="lunit">fL</span></div><div class="lflag low">▼ LOW</div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">MCH</div><div class="lref">Ref: 27–32 pg</div></div><div class="lab-right"><div class="lval low">17.5 <span class="lunit">pg</span></div><div class="lflag low">▼ LOW</div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">MCHC</div><div class="lref">Ref: 31.5–34.5%</div></div><div class="lab-right"><div class="lval low">27.8 <span class="lunit">%</span></div><div class="lflag low">▼ LOW</div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">RDW</div><div class="lref">Ref: 11.6–14.0%</div></div><div class="lab-right"><div class="lval high">19.4 <span class="lunit">%</span></div><div class="lflag high">▲ HIGH</div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Neutrophils</div><div class="lref">Ref: 40–80%</div></div><div class="lab-right"><div class="lval normal">65.5 <span class="lunit">%</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Lymphocytes</div><div class="lref">Ref: 20–40%</div></div><div class="lab-right"><div class="lval normal">28.0 <span class="lunit">%</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Blood Group & Rh</div><div class="lref">—</div></div><div class="lab-right"><div class="lval normal">B <span class="lunit">Positive</span></div></div></div>
+      </div>
+      <div class="echo-section" style="margin-top:14px">🧪 Biochemistry</div>
+      <div class="lab-grid">
+        <div class="lab-item"><div class="lab-left"><div class="lname">HbA1C</div><div class="lref">Ref: 4–6% Normal</div></div><div class="lab-right"><div class="lval high">6.4 <span class="lunit">%</span></div><div class="lflag high">Good Control</div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Glucose (Random)</div><div class="lref">Ref: &lt;140 mg/dL</div></div><div class="lab-right"><div class="lval high">166 <span class="lunit">mg/dL</span></div><div class="lflag high">▲ HIGH</div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Urea</div><div class="lref">Ref: 16.6–48.5 mg/dL</div></div><div class="lab-right"><div class="lval normal">25 <span class="lunit">mg/dL</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Creatinine</div><div class="lref">Ref: 0.51–0.95 mg/dL</div></div><div class="lab-right"><div class="lval normal">0.7 <span class="lunit">mg/dL</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">TSH</div><div class="lref">Ref: 0.27–4.2 µIU/mL</div></div><div class="lab-right"><div class="lval normal">0.816 <span class="lunit">µIU/mL</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Bicarbonate</div><div class="lref">Ref: 21–28 mmol/L</div></div><div class="lab-right"><div class="lval normal">27.8 <span class="lunit">mmol/L</span></div></div></div>
+      </div>
+      <div class="echo-section" style="margin-top:14px">🫀 Liver Function Test (LFT)</div>
+      <div class="lab-grid">
+        <div class="lab-item"><div class="lab-left"><div class="lname">SGOT / AST</div><div class="lref">Ref: 10–35 IU/L</div></div><div class="lab-right"><div class="lval normal">10 <span class="lunit">IU/L</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">SGPT / ALT</div><div class="lref">Ref: 10–35 IU/L</div></div><div class="lab-right"><div class="lval normal">13 <span class="lunit">IU/L</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Alkaline Phosphatase</div><div class="lref">Ref: 35–105 U/L</div></div><div class="lab-right"><div class="lval normal">84 <span class="lunit">U/L</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Total Bilirubin</div><div class="lref">Ref: &lt;1.2 mg/dL</div></div><div class="lab-right"><div class="lval normal">0.2 <span class="lunit">mg/dL</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Total Protein</div><div class="lref">Ref: 6.4–8.3 g/dL</div></div><div class="lab-right"><div class="lval normal">7.3 <span class="lunit">g/dL</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Albumin</div><div class="lref">Ref: 3.5–5.2 g/dL</div></div><div class="lab-right"><div class="lval normal">4.4 <span class="lunit">g/dL</span></div></div></div>
+      </div>
+      <div class="echo-section" style="margin-top:14px">⚗️ Electrolytes & Serology</div>
+      <div class="lab-grid">
+        <div class="lab-item"><div class="lab-left"><div class="lname">Sodium</div><div class="lref">Ref: 136–145 mmol/L</div></div><div class="lab-right"><div class="lval normal">143 <span class="lunit">mmol/L</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Potassium</div><div class="lref">Ref: 3.5–5.1 mmol/L</div></div><div class="lab-right"><div class="lval normal">4.3 <span class="lunit">mmol/L</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">Chloride</div><div class="lref">Ref: 98–107 mmol/L</div></div><div class="lab-right"><div class="lval normal">103 <span class="lunit">mmol/L</span></div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">HIV</div><div class="lref">Non Reactive: &lt;1.00</div></div><div class="lab-right"><div class="lval normal">Non Reactive</div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">HCV</div><div class="lref">Non Reactive: &lt;1.00</div></div><div class="lab-right"><div class="lval normal">Non Reactive</div></div></div>
+        <div class="lab-item"><div class="lab-left"><div class="lname">HBsAg</div><div class="lref">Non Reactive: &lt;1.00</div></div><div class="lab-right"><div class="lval normal">Non Reactive</div></div></div>
+      </div>
+    `
+  },
+  {
+    id:3, type:"echo", typeLabel:"Echocardiogram", date:"2022-12-22", month:"2022-12",
+    title:"2D Echo with Colour Doppler (Echocardiogram Report)",
+    doctor:"Dr. T. Ashok Kumar M.D, D.M (Cardiology) — Consultant Cardiologist; Mrs. B. Jayalakshmi (Echo Technologist)",
+    facility:"Dr. Kamakshi Memorial Hospital",
+    tags:["Echo","2D Echo","Doppler","EF 70%","Cardiology","Ref: Dr. Rajkumar P","IP: 448209"],
+    render: () => `
+      <div class="echo-section">LV Study — Teicholz Method</div>
+      <div class="echo-grid">
+        <div class="echo-item"><div class="echo-param">AO (es)</div><div class="echo-val">2.7 cm</div></div>
+        <div class="echo-item"><div class="echo-param">LA (ed)</div><div class="echo-val">3.6 cm</div></div>
+        <div class="echo-item"><div class="echo-param">RVID (ed)</div><div class="echo-val">2.9 cm</div></div>
+        <div class="echo-item"><div class="echo-param">LVID (ed)</div><div class="echo-val">4.5 cm</div></div>
+        <div class="echo-item"><div class="echo-param">LVID (es)</div><div class="echo-val">2.7 cm</div></div>
+        <div class="echo-item"><div class="echo-param">IVS (ed/es)</div><div class="echo-val">1.0 / 1.1 cm</div></div>
+        <div class="echo-item"><div class="echo-param">LVPW (ed/es)</div><div class="echo-val">1.2 / 1.3 cm</div></div>
+        <div class="echo-item"><div class="echo-param">EF (Ejection Fraction)</div><div class="echo-val" style="color:#16a34a;font-size:16px">70% ✓</div></div>
+        <div class="echo-item"><div class="echo-param">FS (Fractional Shortening)</div><div class="echo-val">40%</div></div>
+      </div>
+      <div class="echo-section">2D Morphological Data</div>
+      <div class="morpho-row"><span class="morpho-name">Mitral Valve (AML/PML)</span><span class="morpho-status">Normal</span></div>
+      <div class="morpho-row"><span class="morpho-name">Aortic Valve</span><span class="morpho-status">Normal</span></div>
+      <div class="morpho-row"><span class="morpho-name">Tricuspid Valve</span><span class="morpho-status">Normal</span></div>
+      <div class="morpho-row"><span class="morpho-name">Pulmonary Valve</span><span class="morpho-status">Normal</span></div>
+      <div class="morpho-row"><span class="morpho-name">Interventricular Septum</span><span class="morpho-status">Intact</span></div>
+      <div class="morpho-row"><span class="morpho-name">Interatrial Septum</span><span class="morpho-status">Intact</span></div>
+      <div class="morpho-row"><span class="morpho-name">Aorta</span><span class="morpho-status">Normal</span></div>
+      <div class="morpho-row"><span class="morpho-name">Pulmonary Artery</span><span class="morpho-status">Normal</span></div>
+      <div class="morpho-row"><span class="morpho-name">Right Ventricle</span><span class="morpho-status">Normal</span></div>
+      <div class="morpho-row"><span class="morpho-name">Left Ventricle</span><span class="morpho-status">Normal</span></div>
+      <div class="morpho-row"><span class="morpho-name">Left Atrium</span><span class="morpho-status">Normal</span></div>
+      <div class="morpho-row"><span class="morpho-name">Pericardium</span><span class="morpho-status">No Effusion</span></div>
+      <div class="echo-section">Doppler Study</div>
+      <div class="report-box">
+        <strong>Pulse Wave Doppler:</strong> Mitral valve velocity E/A: E – 0.9 m/s, A – 0.8 m/s &nbsp;·&nbsp; MVDCET: 172 ms<br><br>
+        <strong>Continuous Wave Doppler:</strong><br>
+        Max. Velocity/gradient across Aortic Valve: 1.7 m/s — 11 mmHg<br>
+        Velocity/gradient across Pulmonic Valve: 1.3 m/s — 7 mmHg<br>
+        TR velocity up to: 1.8 m/s — 13 mmHg
+      </div>
+      <div class="echo-section">Comments</div>
+      <div class="report-box">Normal chamber dimensions · No Regional wall motion abnormality · Normal LV systolic and diastolic function · Trivial Pulmonary, Mitral and Tricuspid Regurgitation · No Pulmonary arterial Hypertension · No e/o clot (or) vegetation</div>
+      <div class="impression-box" style="margin-top:10px">
+        <div class="imp-label">Impression</div>
+        <ul>
+          <li>No Regional Wall Motion Abnormality</li>
+          <li>Normal LV Systolic and Diastolic Function</li>
+        </ul>
+      </div>
+    `
+  },
+  {
+    id:4, type:"radiology", typeLabel:"Radiology — CT Brain", date:"2022-12-22", month:"2022-12",
+    title:"CT Brain — Plain (Without Contrast)",
+    doctor:"Dr. Madhumita C, MD (RD), FVIR — Interventional Radiologist",
+    facility:"Dr. Kamakshi Memorial Hospital",
+    tags:["CT Brain","Radiology","Sebaceous Cyst","Scalp","UHID: 448209","Accession: 11336113"],
+    render: () => `
+      <div class="report-box">
+        <strong>Technique:</strong> Serial axial sections from base of skull to vertex without contrast. Base 5mm, Cerebrum 5mm.<br><br>
+        <strong>Findings:</strong><br>
+        • No abnormal density in the cerebral hemispheres<br>
+        • No evidence of mass lesion or hemorrhage<br>
+        • Gray white differentiation is maintained<br>
+        • Cerebellum, brainstem and basal cisterns appear normal<br>
+        • Basal cisterns show normal CSF density<br>
+        • Cerebello pontine angles and internal auditory meatus appear normal<br>
+        • Ventricular system and sulci are normal for the age<br>
+        • Sella and parasellar regions are normal<br>
+        • Basal ganglia, thalami and capsular tracts appear normal<br>
+        • Bones of the cranium appear normal<br><br>
+        <strong style="color:#7c3aed">A well defined lobulated soft tissue density lesion (60 HU) measuring 4.1 × 4.1 cm with few calcific foci noted arising from right high parietal scalp.</strong><br>
+        <strong>No evidence of adjacent bony erosion / intracranial involvement.</strong><br>
+        Mucosal thickening noted in left maxillary sinus.
+      </div>
+      <div class="impression-box">
+        <div class="imp-label">Impression</div>
+        <ul>
+          <li><strong>A well defined lobulated soft tissue density lesion with few calcific foci arising from right high parietal scalp — Sebaceous Cyst.</strong></li>
+          <li>No significant abnormality in brain parenchyma.</li>
+        </ul>
+      </div>
+    `
+  },
+  {
+    id:5, type:"ecg", typeLabel:"ECG", date:"2022-12-22", month:"2022-12",
+    title:"12-Lead ECG (Electrocardiogram)",
+    doctor:"Dr. Kamakshi Memorial Hospital",
+    facility:"Dr. Kamakshi Memorial Hospital",
+    tags:["ECG","Sinus Rhythm","Normal ECG","HR 83","Mrs. Swarnambigai"],
+    render: () => `
+      <div class="ecg-result">✅ SINUS RHYTHM — NORMAL ECG</div>
+      <div class="echo-section" style="margin-top:14px">ECG Parameters</div>
+      <div class="ecg-grid">
+        <div class="ecg-item"><div class="ecg-param">Heart Rate</div><div class="ecg-val">83 bpm</div></div>
+        <div class="ecg-item"><div class="ecg-param">RR Interval</div><div class="ecg-val">724 ms</div></div>
+        <div class="ecg-item"><div class="ecg-param">P Wave</div><div class="ecg-val">98 ms</div></div>
+        <div class="ecg-item"><div class="ecg-param">PR Interval</div><div class="ecg-val">134 ms</div></div>
+        <div class="ecg-item"><div class="ecg-param">QRS Duration</div><div class="ecg-val">82 ms</div></div>
+        <div class="ecg-item"><div class="ecg-param">QT Interval</div><div class="ecg-val">370 ms</div></div>
+        <div class="ecg-item"><div class="ecg-param">QTc</div><div class="ecg-val">435 ms</div></div>
+        <div class="ecg-item"><div class="ecg-param">P Axis</div><div class="ecg-val">36°</div></div>
+        <div class="ecg-item"><div class="ecg-param">QRS Axis</div><div class="ecg-val">6°</div></div>
+        <div class="ecg-item"><div class="ecg-param">T Axis</div><div class="ecg-val">14°</div></div>
+        <div class="ecg-item"><div class="ecg-param">Sokolow Index</div><div class="ecg-val">2.78 mV</div></div>
+        <div class="ecg-item"><div class="ecg-param">R(V5)</div><div class="ecg-val">1.62 mV</div></div>
+      </div>
+    `
+  }
+];
+
+let openId = null;
+let sortAsc = true;
+
+
+function getFiltered() {
+  var q = document.getElementById("search-input").value.toLowerCase();
+  var type = document.getElementById("type-filter").value;
+  var month = document.getElementById("date-filter").value;
+  var filtered = RECORDS.filter(function(r) {
+    var typeMatch = type === "all" || r.type === type;
+    var monthMatch = !month || r.month === month;
+    var searchStr = [r.title, r.doctor, r.typeLabel].concat(r.tags).join(" ").toLowerCase();
+    var qMatch = !q || searchStr.indexOf(q) !== -1;
+    return typeMatch && monthMatch && qMatch;
+  });
+  filtered.sort(function(a, b) {
+    return sortAsc ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
+  });
+  return filtered;
+}
+
+function renderRecords(list) {
+  var container = document.getElementById("record-list");
+  var noResult = document.getElementById("no-result");
+  container.innerHTML = "";
+  if (!list.length) { noResult.style.display = "block"; return; }
+  noResult.style.display = "none";
+  var lastMonth = "";
+  list.forEach(function(r) {
+    var d = new Date(r.date);
+    var mk = d.toLocaleDateString("en-IN", {year:"numeric",month:"long"});
+    if (mk !== lastMonth) {
+      var lbl = document.createElement("div");
+      lbl.className = "month-label";
+      lbl.textContent = mk;
+      container.appendChild(lbl);
+      lastMonth = mk;
+    }
+    var card = document.createElement("div");
+    card.className = "record-card" + (openId === r.id ? " open" : "");
+    var isOpen = openId === r.id;
+    var rid = r.id;
+    card.innerHTML =
+      '<div class="record-header" onclick="toggleCard(' + rid + ')">' +
+        '<div style="display:flex;gap:10px;flex:1;align-items:flex-start">' +
+          '<span class="rtype rtype-' + r.type + '">' + r.typeLabel + '</span>' +
+          '<div style="flex:1">' +
+            '<div class="rtitle">' + r.title + '</div>' +
+            '<div class="rmeta">' +
+              '<span>📅 ' + new Date(r.date).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}) + '</span>' +
+              '<span>👨‍⚕️ ' + r.doctor + '</span>' +
+              '<span>🏥 ' + r.facility + '</span>' +
+            '</div>' +
+            '<div class="tag-row">' + r.tags.map(function(t){return '<span class="tag">'+t+'</span>';}).join("") + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="chevron">⌄</div>' +
+      '</div>' +
+      '<div class="record-body" style="display:' + (isOpen ? 'block' : 'none') + '">' + (isOpen ? r.render() : '') + '</div>';
+    container.appendChild(card);
+  });
+}
+
+function toggleCard(id) {
+  openId = (openId === id ? null : id);
+  renderFiltered();
+}
+
+function filterRecords() { renderFiltered(); }
+
+function renderFiltered() { renderRecords(getFiltered()); }
+
+function switchTab(tab) {
+  document.getElementById("tab-btn-history").className = "tab" + (tab === "history" ? " active" : "");
+  document.getElementById("tab-btn-comparison").className = "tab" + (tab === "comparison" ? " active" : "");
+  document.getElementById("tab-history").style.display = tab === "history" ? "block" : "none";
+  document.getElementById("tab-comparison").style.display = tab === "comparison" ? "block" : "none";
+  return false;
+}
+
+function toggleSort() {
+  sortAsc = !sortAsc;
+  document.getElementById("sort-btn").textContent = sortAsc ? "⬆ Oldest First" : "⬇ Newest First";
+  renderFiltered();
+  return false;
+}
+
+function handleFiles(files) {
+  if (!files.length) return;
+  var notice = document.getElementById("added-notice");
+  notice.style.display = "block";
+  notice.innerHTML = Array.from(files).map(function(f) {
+    return '<div class="added-file-notice">✅ <strong>' + f.name + '</strong> added (' + (f.size/1024).toFixed(0) + ' KB)</div>';
+  }).join("");
+}
+
+// Wire up tab anchors
+document.getElementById("tab-btn-history").onclick = function(){ return switchTab("history"); };
+document.getElementById("tab-btn-comparison").onclick = function(){ return switchTab("comparison"); };
+document.getElementById("sort-btn").onclick = function(){ return toggleSort(); };
+document.querySelector(".add-files-bar").onclick = function(){ document.getElementById("file-input").click(); };
+
+renderFiltered();
+</script>
+</body>
+</html>
