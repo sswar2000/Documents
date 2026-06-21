@@ -1,647 +1,1076 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Mrs. Swarnambigai — Health Records | Dr. Kamakshi Memorial Hospital</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mrs. Swarnambigai S — Medical Records Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ── RESET ── */
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;min-height:100vh;overflow-x:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f6fa;color:#1a1a2e;font-size:16px;-webkit-text-size-adjust:100%}
-
-/* ── LAYOUT ── */
-.app{width:100%;max-width:960px;margin:0 auto;padding:12px}
-
-/* ── TOP BAR ── */
-.topbar{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-.patient-info{display:flex;align-items:center;gap:12px}
-.avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0}
-.patient-name{font-size:16px;font-weight:700;color:#1a1a2e}
-.patient-meta{font-size:12px;color:#64748b;margin-top:3px;line-height:1.5}
-.badges{display:flex;gap:6px;flex-wrap:wrap}
-.badge{font-size:11px;padding:5px 10px;border-radius:20px;font-weight:600;display:inline-block}
-.badge-green{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
-.badge-red{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
-.badge-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
-.badge-purple{background:#faf5ff;color:#6b21a8;border:1px solid #e9d5ff}
-
-/* ── STATS ── */
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.stat{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;text-align:center}
-.stat-label{font-size:10px;color:#64748b;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
-.stat-val{font-size:20px;font-weight:700;color:#1a1a2e}
-.stat-sub{font-size:10px;color:#94a3b8;margin-top:2px}
-
-/* ── CONTROLS ── */
-.controls{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.search-wrap{position:relative;width:100%}
-.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.45;pointer-events:none}
-.search-wrap input{width:100%;padding:11px 10px 11px 34px;font-size:15px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#1a1a2e;outline:none;-webkit-appearance:none}
-.controls-row2{display:flex;gap:8px;flex-wrap:wrap}
-select,input[type=month]{flex:1;min-width:120px;padding:11px 12px;font-size:14px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#1a1a2e;outline:none;-webkit-appearance:none;appearance:none}
-.sort-btn{padding:11px 14px;font-size:13px;font-weight:600;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#6366f1;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center}
-
-/* ── TABS ── */
-.tabs{display:flex;margin-bottom:0;border-bottom:3px solid #e2e8f0}
-.tab{flex:1;padding:14px 8px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;display:block;color:#64748b;border-bottom:3px solid transparent;margin-bottom:-3px;background:#f8fafc;border-radius:10px 10px 0 0;-webkit-user-select:none;user-select:none;transition:color .15s,background .15s}
-.tab.active{color:#6366f1;border-bottom-color:#6366f1;background:#fff}
-
-/* ── TAB CONTENT ── */
-.tab-content{background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;padding:14px;margin-bottom:16px;min-height:200px}
-
-/* ── RECORDS ── */
-.month-label{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin:14px 0 8px;padding-left:2px}
-.record-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:10px;overflow:hidden}
-.record-card.open{border-color:#6366f1}
-.record-header{padding:14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.rtype{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.04em;flex-shrink:0;margin-top:2px}
-.rtype-lab{background:#eff6ff;color:#1d4ed8}
-.rtype-radiology{background:#faf5ff;color:#6b21a8}
-.rtype-echo{background:#fdf4ff;color:#86198f}
-.rtype-ecg{background:#fff7ed;color:#c2410c}
-.rtype-discharge{background:#fefce8;color:#854d0e}
-.rtype-surgery{background:#fef2f2;color:#991b1b}
-.rtitle{font-size:14px;font-weight:600;color:#1a1a2e;flex:1;line-height:1.4}
-.rmeta{font-size:12px;color:#64748b;margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;line-height:1.5}
-.tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.tag{font-size:10px;background:#f1f5f9;color:#475569;padding:3px 8px;border-radius:20px;font-weight:500}
-.chevron{font-size:20px;color:#94a3b8;flex-shrink:0;transition:transform .2s;line-height:1;margin-top:2px}
-.open .chevron{transform:rotate(180deg)}
-.record-body{border-top:1px solid #f1f5f9;padding:14px;background:#fafbff}
-
-/* ── LAB GRID ── */
-.lab-grid{display:grid;grid-template-columns:1fr;gap:8px}
-.lab-item{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.lab-left .lname{font-size:13px;font-weight:600;color:#334155}
-.lab-left .lref{font-size:11px;color:#94a3b8;margin-top:2px}
-.lab-right{text-align:right;flex-shrink:0}
-.lval{font-size:15px;font-weight:700}
-.lval.normal{color:#16a34a}
-.lval.high{color:#d97706}
-.lval.low{color:#dc2626}
-.lunit{font-size:10px;color:#94a3b8;font-weight:400}
-.lflag{font-size:10px;font-weight:700;margin-top:1px}
-.lflag.high{color:#d97706}
-.lflag.low{color:#dc2626}
-
-/* ── ECHO ── */
-.echo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.echo-item{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px}
-.echo-param{font-size:11px;color:#64748b;font-weight:600;margin-bottom:2px}
-.echo-val{font-size:14px;font-weight:700;color:#1a1a2e}
-.echo-section{font-size:11px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px;padding-bottom:4px;border-bottom:1px solid #e2e8f0}
-.morpho-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
-.morpho-row:last-child{border-bottom:none}
-.morpho-name{color:#475569;font-weight:500}
-.morpho-status{font-size:11px;font-weight:700;color:#16a34a;background:#f0fdf4;padding:3px 8px;border-radius:20px}
-
-/* ── DISCHARGE ── */
-.ds-section{margin-bottom:14px}
-.ds-label{font-size:10px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.ds-content{font-size:13px;color:#334155;line-height:1.7;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px}
-.meds-table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0}
-.meds-table th{background:#f8fafc;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid #e2e8f0}
-.meds-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
-.meds-table tr:last-child td{border-bottom:none}
-.vitals-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.vital-item{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;text-align:center}
-.vital-label{font-size:10px;color:#94a3b8;font-weight:600;margin-bottom:3px}
-.vital-val{font-size:14px;font-weight:700;color:#1a1a2e}
-.warning-list{background:#fff;border:1px solid #fecdd3;border-radius:8px;padding:10px 14px}
-.warning-list li{font-size:13px;color:#7f1d1d;margin-bottom:6px;margin-left:16px;line-height:1.5}
-
-/* ── CT / ECG ── */
-.report-box{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;font-size:13px;line-height:1.8;color:#334155}
-.report-box strong{color:#1a1a2e;font-weight:600}
-.impression-box{background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:12px 16px;margin-top:10px}
-.impression-box .imp-label{font-size:10px;font-weight:700;color:#6b21a8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.impression-box li{font-size:13px;color:#3b0764;margin-bottom:6px;margin-left:16px;line-height:1.6}
-.ecg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ecg-item{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;text-align:center}
-.ecg-param{font-size:10px;color:#94a3b8;font-weight:600;margin-bottom:3px}
-.ecg-val{font-size:14px;font-weight:700;color:#1a1a2e}
-.ecg-result{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;color:#14532d;text-align:center}
-
-/* ── COMPARISON ── */
-.comp-wrap{width:100%}
-.comp-title{font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:10px}
-.flag-legend{display:flex;gap:12px;font-size:12px;color:#64748b;margin-bottom:14px;flex-wrap:wrap}
-.flag-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
-.fd-normal{background:#16a34a}.fd-high{background:#d97706}.fd-low{background:#dc2626}
-.comp-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
-.comp-table{width:100%;border-collapse:collapse;font-size:13px}
-.comp-table th{background:#f8fafc;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;padding:10px 10px;border-bottom:2px solid #e2e8f0;text-align:left;white-space:nowrap}
-.comp-table td{padding:10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
-.comp-table tr:last-child td{border-bottom:none}
-.cval-normal{color:#16a34a;font-weight:700}
-.cval-high{color:#d97706;font-weight:700}
-.cval-low{color:#dc2626;font-weight:700}
-.test-name{font-weight:600;color:#334155}
-.test-ref{font-size:11px;color:#94a3b8}
-.section-divider{background:#f8fafc}
-.section-divider td{font-size:11px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid #e2e8f0}
-.no-result{text-align:center;padding:3rem;color:#94a3b8;font-size:14px}
-
-/* ── ADD FILES ── */
-.add-files-bar{background:#fff;border:2px dashed #c7d2fe;border-radius:12px;padding:18px;text-align:center;margin-bottom:12px}
-.add-files-bar input{display:none}
-.add-btn-label{font-size:14px;color:#6366f1;font-weight:600}
-.add-btn-label svg{vertical-align:middle;margin-right:6px}
-.add-hint{font-size:12px;color:#94a3b8;margin-top:6px}
-.added-file-notice{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;margin-bottom:10px}
-
-/* ── DESKTOP OVERRIDES ── */
-@media(min-width:640px){
-  .topbar{flex-direction:row;align-items:center;justify-content:space-between}
-  .stats{grid-template-columns:repeat(4,1fr)}
-  .controls{flex-direction:row;align-items:center}
-  .controls-row2{flex:1;flex-wrap:nowrap}
-  .search-wrap{flex:2}
-  .lab-grid{grid-template-columns:1fr 1fr}
-  .vitals-row{grid-template-columns:repeat(3,1fr)}
-  .ecg-grid{grid-template-columns:repeat(3,1fr)}
-  .tab{font-size:14px;padding:14px 24px}
+:root{
+  --pr:#6366f1;--pr-l:#eef2ff;--pr-d:#3730a3;
+  --bg:#f4f6fb;--sr:#ffffff;--tx:#1a1b25;--mu:#64748b;--bd:#e2e8f0;
+  --s1:0 1px 4px rgba(0,0,0,.07);--s2:0 4px 16px rgba(0,0,0,.09);
+  --r1:8px;--r2:12px;--r3:18px;
+  --cy:#d97706;--cy-b:#fffbeb;
+  --ca:#dc2626;--ca-b:#fef2f2;
+  --gy:#db2777;--gy-b:#fdf2f8;
+  --fn:'Outfit',sans-serif;--fb:'Inter',sans-serif;
 }
+[data-theme=dark]{
+  --bg:#0f172a;--sr:#1e293b;--tx:#f1f5f9;--mu:#94a3b8;--bd:#334155;
+  --pr-l:#1e1b4b;--pr-d:#a5b4fc;
+  --cy-b:#451a03;--ca-b:#450a0a;--gy-b:#500724;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px;}
+a{color:var(--pr);}
+
+/* LAYOUT */
+.wrap{max-width:1440px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
+
+/* HEADER */
+.hdr{background:var(--sr);border:1px solid var(--bd);border-radius:var(--r3);
+     padding:16px 20px;box-shadow:var(--s1);display:flex;gap:14px;flex-wrap:wrap;
+     align-items:center;justify-content:space-between;position:relative;}
+.hdr-l{display:flex;align-items:center;gap:14px;}
+.av{width:54px;height:54px;border-radius:50%;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--fn);font-weight:800;font-size:17px;color:#fff;flex-shrink:0;}
+h1{font-family:var(--fn);font-size:19px;font-weight:800;letter-spacing:-.02em;}
+.meta{font-size:12px;color:var(--mu);margin-top:3px;line-height:1.5;}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;}
+.badge{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:20px;
+       border:1.5px solid;display:inline-flex;align-items:center;gap:3px;}
+.b0{background:var(--pr-l);color:var(--pr-d);border-color:var(--pr);}
+.b1{background:var(--cy-b);color:var(--cy);border-color:var(--cy);}
+.b2{background:var(--ca-b);color:var(--ca);border-color:var(--ca);}
+.b3{background:var(--gy-b);color:var(--gy);border-color:var(--gy);}
+.tbtn{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;
+      border:1px solid var(--bd);background:var(--sr);color:var(--tx);
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      font-size:15px;transition:.2s;}
+.tbtn:hover{background:var(--bd);}
+
+/* ALERT */
+.alert{background:var(--ca-b);border:1.5px solid var(--ca);border-radius:var(--r2);
+       padding:11px 16px;font-size:12.5px;font-weight:500;line-height:1.6;color:#7f1d1d;}
+[data-theme=dark] .alert{color:#fecaca;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid var(--bd);gap:0;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:11px 18px;font-family:var(--fn);font-weight:700;font-size:13px;
+     color:var(--mu);background:transparent;border:none;border-bottom:2.5px solid transparent;
+     margin-bottom:-2px;cursor:pointer;white-space:nowrap;transition:.15s;}
+.tab:hover{color:var(--tx);background:rgba(99,102,241,.06);border-radius:6px 6px 0 0;}
+.tab.on{color:var(--pr);border-bottom-color:var(--pr);}
+
+/* PANELS */
+.pnl{display:none;background:var(--sr);border:1px solid var(--bd);border-radius:var(--r3);
+     padding:18px;box-shadow:var(--s2);}
+.pnl.on{display:block;}
+
+/* INPUTS */
+.iw{position:relative;}
+.iw svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);
+         color:var(--mu);pointer-events:none;width:14px;height:14px;}
+input.fi{width:100%;padding:9px 10px 9px 32px;border:1.5px solid var(--bd);
+          border-radius:var(--r1);background:var(--bg);color:var(--tx);
+          font-size:13px;outline:none;transition:.15s;font-family:var(--fb);}
+input.fi:focus{border-color:var(--pr);box-shadow:0 0 0 3px rgba(99,102,241,.15);background:var(--sr);}
+select.fi{padding:9px 10px;border:1.5px solid var(--bd);border-radius:var(--r1);
+           background:var(--bg);color:var(--tx);font-size:12.5px;outline:none;
+           cursor:pointer;font-family:var(--fb);}
+
+/* === PDF BROWSER === */
+.br-grid{display:grid;grid-template-columns:360px 1fr;gap:14px;height:700px;}
+@media(max-width:900px){.br-grid{grid-template-columns:1fr;}}
+.sidebar{display:flex;flex-direction:column;gap:9px;height:100%;
+          border-right:1px solid var(--bd);padding-right:12px;overflow:hidden;}
+.sb-top{display:flex;flex-direction:column;gap:7px;}
+.sb-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.sb-stat{display:flex;justify-content:space-between;align-items:center;
+          font-size:10.5px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.sb-sort{background:none;border:none;color:var(--pr);cursor:pointer;
+          font-weight:700;font-size:10.5px;}
+.pg-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:2px;}
+.pg-list::-webkit-scrollbar{width:4px;}
+.pg-list::-webkit-scrollbar-thumb{background:var(--bd);border-radius:10px;}
+
+.pc{background:var(--bg);border:1.5px solid transparent;border-radius:var(--r1);
+    padding:10px;cursor:pointer;transition:.15s;}
+.pc:hover{border-color:var(--bd);box-shadow:var(--s1);transform:translateY(-1px);}
+.pc.sel{background:var(--pr-l);border-color:var(--pr);}
+.pc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.pn{font-size:10px;font-weight:800;background:var(--sr);color:var(--tx);
+    border:1px solid var(--bd);padding:2px 7px;border-radius:12px;}
+.pc.sel .pn{background:var(--pr);color:#fff;border-color:var(--pr);}
+.tt{font-size:9px;font-weight:800;text-transform:uppercase;padding:2px 5px;border-radius:3px;}
+.tt-lab{background:#eff6ff;color:#1e40af;}
+.tt-hpe{background:#ecfdf5;color:#065f46;}
+.tt-echo{background:#faf5ff;color:#581c87;}
+.tt-discharge{background:#fffbeb;color:#92400e;}
+.tt-opd{background:#f3f4f6;color:#374151;}
+.tt-radiology{background:#fff1f2;color:#9f1239;}
+.tt-ecg{background:#f0fdfa;color:#115e59;}
+.tt-chemo{background:#f5f3ff;color:#4c1d95;}
+.tt-other{background:#f8fafc;color:#475569;}
+.pc-title{font-size:12.5px;font-weight:700;color:var(--tx);line-height:1.3;margin-bottom:3px;}
+.pc-desc{font-size:11px;color:var(--mu);line-height:1.4;
+          display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.pc-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--mu);margin-top:3px;}
+
+/* PDF viewer */
+.pv{border-radius:var(--r2);border:1px solid var(--bd);overflow:hidden;
+    background:#525659;display:flex;flex-direction:column;height:100%;}
+.pv-hdr{background:var(--sr);border-bottom:1px solid var(--bd);
+         padding:10px 14px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.pv-title{font-family:var(--fn);font-weight:700;font-size:13px;white-space:nowrap;
+           overflow:hidden;text-overflow:ellipsis;max-width:70%;}
+.pv-pg{font-size:11.5px;color:var(--mu);font-weight:700;}
+#pdf-frame{width:100%;flex:1;border:none;}
+.pdf-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;
+          height:100%;color:#ccc;gap:12px;font-size:14px;text-align:center;padding:20px;}
+.pdf-msg a{color:#7dd3fc;font-weight:700;}
+
+/* === SEARCH === */
+.s-wrap{display:flex;flex-direction:column;gap:13px;}
+.s-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:9px;}
+@media(max-width:768px){.s-grid{grid-template-columns:1fr;}}
+.d-strip{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+.d-lbl{font-size:11px;font-weight:700;color:var(--mu);}
+.db{padding:5px 13px;border-radius:20px;font-size:11px;font-weight:700;
+    border:1.5px solid var(--bd);background:var(--sr);color:var(--mu);
+    cursor:pointer;transition:.15s;}
+.db:hover{border-color:var(--pr);color:var(--tx);}
+.db.on-cyst{background:var(--cy-b);color:var(--cy);border-color:var(--cy);}
+.db.on-cancer{background:var(--ca-b);color:var(--ca);border-color:var(--ca);}
+.db.on-gynae{background:var(--gy-b);color:var(--gy);border-color:var(--gy);}
+.s-stat{font-size:12px;color:var(--mu);}
+.s-res{display:flex;flex-direction:column;gap:9px;max-height:580px;overflow-y:auto;padding-right:4px;}
+.s-res::-webkit-scrollbar{width:4px;}
+.s-res::-webkit-scrollbar-thumb{background:var(--bd);border-radius:10px;}
+.rc{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r2);padding:13px;transition:.15s;}
+.rc:hover{border-color:var(--pr);box-shadow:var(--s1);}
+.rc-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;}
+.rc-info h3{font-size:13.5px;font-weight:700;margin-bottom:3px;}
+.rc-meta{font-size:11px;color:var(--mu);display:flex;gap:10px;flex-wrap:wrap;}
+.rc-body{margin-top:8px;background:var(--sr);border:1px solid var(--bd);
+          border-radius:var(--r1);padding:9px 12px;font-size:12.5px;line-height:1.6;color:var(--tx);}
+.jp{font-size:10.5px;font-weight:800;color:var(--pr);background:var(--pr-l);
+    border:1px solid var(--pr);padding:3px 9px;border-radius:5px;
+    cursor:pointer;white-space:nowrap;transition:.15s;}
+.jp:hover{background:var(--pr);color:#fff;}
+.hl{background:#fef08a;color:#854d0e;padding:1px 3px;border-radius:2px;font-weight:600;}
+[data-theme=dark] .hl{background:#713f12;color:#fef08a;}
+.dd{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:3px;}
+
+/* === LAB COMPARE === */
+.lb-hdr{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px;margin-bottom:11px;}
+.lb-hdr h2{font-family:var(--fn);font-size:16px;font-weight:700;}
+.lb-ctrl{display:flex;gap:7px;align-items:center;}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:var(--r2);}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:780px;}
+th{background:var(--bg);font-family:var(--fn);font-size:10.5px;font-weight:800;
+   color:var(--mu);text-transform:uppercase;letter-spacing:.05em;padding:10px 11px;
+   text-align:left;border-bottom:2px solid var(--bd);position:sticky;top:0;z-index:5;}
+th.vc{text-align:right;}
+td{padding:9px 11px;border-bottom:1px solid var(--bd);vertical-align:middle;}
+tr:hover td{background:var(--pr-l);}
+tr.grp td{background:var(--pr-l);font-family:var(--fn);font-weight:800;
+           color:var(--pr-d);text-transform:uppercase;font-size:10px;letter-spacing:.06em;padding:6px 11px;}
+td.tn{font-weight:700;white-space:nowrap;}
+td.rf{font-size:11px;color:var(--mu);white-space:nowrap;}
+td.vl{font-weight:800;text-align:right;white-space:nowrap;}
+td.nm{color:#16a34a;}
+td.hi{color:var(--cy);}
+td.lo{color:var(--ca);}
+td.em{color:var(--mu);font-weight:400;text-align:center;}
+.vf{display:block;font-size:8.5px;font-weight:800;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--mu);margin-top:9px;}
+.ld{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px;}
+
+/* === TIMELINE === */
+.tl-hdr{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px;margin-bottom:14px;}
+.tl-hdr h2{font-family:var(--fn);font-size:16px;font-weight:700;}
+.tl-body{position:relative;padding-left:26px;}
+.tl-body::before{content:'';position:absolute;left:8px;top:0;bottom:0;
+                   width:2px;background:linear-gradient(to bottom,var(--pr),var(--gy));border-radius:10px;}
+.tc{position:relative;background:var(--bg);border:1px solid var(--bd);border-radius:var(--r2);
+    padding:12px 15px;margin-bottom:12px;box-shadow:var(--s1);}
+.tn2{position:absolute;left:-22px;top:14px;width:12px;height:12px;border-radius:50%;
+     border:2.5px solid var(--sr);}
+.td2{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-bottom:3px;}
+.tt2{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:4px;}
+.td3{font-size:12px;color:var(--mu);line-height:1.5;}
+
+/* Shared */
+.empty{text-align:center;padding:2.5rem;color:var(--mu);font-size:13px;}
+.ph2{font-family:var(--fn);font-size:16px;font-weight:700;margin-bottom:4px;}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="wrap">
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="patient-info">
-    <div class="avatar">SW</div>
+<!-- HEADER -->
+<header class="hdr">
+  <button class="tbtn" id="tbtn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+  <div class="hdr-l">
+    <div class="av">SW</div>
     <div>
-      <div class="patient-name">Mrs. Swarnambigai</div>
-      <div class="patient-meta">Female, 42 Yrs &nbsp;·&nbsp; Patient ID: 448209 &nbsp;·&nbsp; Blood Group: B+</div>
-      <div class="patient-meta" style="margin-top:2px">📍 No F3 Gokulam Flats, Shree Puram, Gerugambakkam, Chennai – 600 112 &nbsp;·&nbsp; 📞 9444408002</div>
+      <h1>Mrs. Swarnambigai S</h1>
+      <div class="meta">Female &nbsp;·&nbsp; DOB: 24 Apr 1980 &nbsp;·&nbsp; Blood Group: B+ &nbsp;·&nbsp; Patient ID: 448209 / 84900</div>
+      <div class="meta">📍 No F3 Gokulam Flats, Gerugambakkam, Chennai &nbsp;·&nbsp; 📞 9444408002</div>
+      <div class="badges">
+        <span class="badge b0">🏥 Dr. Kamakshi Memorial Hospital</span>
+        <span class="badge b1">🟠 Sebaceous Cyst Scalp (Dec 2022)</span>
+        <span class="badge b2">🔴 Breast Cancer pT1c N0 (Dec 2023)</span>
+        <span class="badge b3">💗 Gynae Follow-up (Feb 2025)</span>
+      </div>
     </div>
   </div>
-  <div class="badges">
-    <span class="badge badge-blue">🏥 Dr. Kamakshi Memorial Hospital</span>
-    <span class="badge badge-green">B+ Blood Group</span>
-    <span class="badge badge-red">⚠️ Drug Allergy: RANTAC</span>
-    <span class="badge badge-purple">Ref: Dr. Rajkumar P</span>
-  </div>
-</div>
+</header>
 
-<!-- STATS -->
-<div class="stats">
-  <div class="stat"><div class="stat-label">Total Records</div><div class="stat-val">8</div><div class="stat-sub">From Dec 2022</div></div>
-  <div class="stat"><div class="stat-label">Lab Tests</div><div class="stat-val">25+</div><div class="stat-sub">CBC, LFT, Biochem…</div></div>
-  <div class="stat"><div class="stat-label">Procedures</div><div class="stat-val">1</div><div class="stat-sub">Excision Biopsy</div></div>
-  <div class="stat"><div class="stat-label">Last Visit</div><div class="stat-val" style="font-size:15px;padding-top:4px">24 Dec 2022</div><div class="stat-sub">Discharged</div></div>
-</div>
-
-<!-- ADD FILES BAR -->
-<div class="add-files-bar">
-  <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="handleFiles(this.files)"/>
-  <label class="add-btn-label" for="file-input">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-    Add New Records
-  </label>
-  <div class="add-hint">Drop PDFs or images here — lab reports, prescriptions, scan reports. They'll appear in your dashboard instantly.</div>
-</div>
-<div id="added-notice" style="display:none"></div>
-
-<!-- CONTROLS -->
-<div class="controls">
-  <div class="search-wrap">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" id="search-input" placeholder="Search records, tests, doctors…" oninput="filterRecords()"/>
-  </div>
-  <div class="controls-row2">
-    <select id="type-filter" onchange="filterRecords()">
-      <option value="all">All types</option>
-      <option value="lab">Lab Report</option>
-      <option value="radiology">Radiology</option>
-      <option value="echo">Echocardiogram</option>
-      <option value="ecg">ECG</option>
-      <option value="discharge">Discharge Summary</option>
-      <option value="surgery">Surgery Note</option>
-    </select>
-    <input type="month" id="date-filter" onchange="filterRecords()" title="Filter by month"/>
-    <a href="#" id="sort-btn" class="sort-btn">⬆ Oldest First</a>
-  </div>
+<!-- ALERT -->
+<div class="alert">
+  <strong>⚠️ ACTIVE ONCOLOGY:</strong> Invasive Breast Carcinoma (Left), Nottingham Grade 3, Dec 2023.
+  ER+(90%) PR+(75%) HER2+(3+). Post BCS + SLNB 04 Jan 2024 — margins &amp; 5 nodes clear.
+  On Tamoxifen. Gynaecological TVS monitoring — Pipelle Feb 2025: benign polyp.
+  Drug Allergy: <strong>RANITIDINE</strong>.
 </div>
 
 <!-- TABS -->
-<div class="tabs">
-  <a href="#" class="tab active" id="tab-btn-history">📋 Record History</a>
-  <a href="#" class="tab" id="tab-btn-comparison">📊 Lab Comparison</a>
-</div>
+<nav class="tabs">
+  <button class="tab on" id="tab-browser" onclick="showTab('browser')">📄 PDF Page Browser (299 Pages)</button>
+  <button class="tab" id="tab-search" onclick="showTab('search')">🔎 Consolidated Study Search</button>
+  <button class="tab" id="tab-compare" onclick="showTab('compare')">📊 Lab Panel Comparison</button>
+  <button class="tab" id="tab-timeline" onclick="showTab('timeline')">🕐 Clinical Timeline</button>
+</nav>
 
-<!-- HISTORY TAB -->
-<div id="tab-history" class="tab-content">
-  <div id="record-list"></div>
-  <div id="no-result" class="no-result" style="display:none">🔍 No records match your search.</div>
-</div>
-
-<!-- COMPARISON TAB -->
-<div id="tab-comparison" class="tab-content" style="display:none">
-  <div class="comp-wrap">
-  <div class="comp-title">Complete Lab Results — 22 Dec 2022</div>
-    <div class="flag-legend">
-      <span><span class="flag-dot fd-normal"></span>Normal</span>
-      <span><span class="flag-dot fd-high"></span>High / Elevated</span>
-      <span><span class="flag-dot fd-low"></span>Low</span>
+<!-- PANEL 1: PDF BROWSER -->
+<section class="pnl on" id="pnl-browser">
+  <div class="br-grid">
+    <div class="sidebar">
+      <div class="sb-top">
+        <div class="iw">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="pg-q" class="fi" placeholder="Search pages, doctors, dates..." oninput="renderPages()">
+        </div>
+        <div class="sb-row">
+          <select id="pg-dis" class="fi" onchange="renderPages()">
+            <option value="">All Diseases</option>
+            <option value="cyst">Sebaceous Cyst</option>
+            <option value="cancer">Breast Cancer</option>
+            <option value="gynae">Gynae Follow-up</option>
+          </select>
+          <select id="pg-type" class="fi" onchange="renderPages()">
+            <option value="">All Types</option>
+            <option value="lab">Lab Report</option>
+            <option value="discharge">Discharge Summary</option>
+            <option value="hpe">HPE / Biopsy</option>
+            <option value="echo">Echo / USG</option>
+            <option value="ecg">ECG</option>
+            <option value="opd">OPD Sheet</option>
+            <option value="radiology">CT / Radiology</option>
+            <option value="chemo">Chemo / RT Logs</option>
+          </select>
+        </div>
+        <div class="sb-stat">
+          <span id="pg-cnt">299 pages</span>
+          <button class="sb-sort" id="sort-btn" onclick="toggleSort()">Page 1&#8594;299 &#8595;</button>
+        </div>
+      </div>
+      <div class="pg-list" id="pg-list"></div>
     </div>
-    <div class="comp-table-wrap">
-    <table class="comp-table">
-      <thead><tr><th style="min-width:200px">Test Name</th><th>Result</th><th>Unit</th><th>Reference Range</th><th>Status</th></tr></thead>
-      <tbody>
-        <tr class="section-divider"><td colspan="5">🩸 Haematology — CBC</td></tr>
-        <tr><td><span class="test-name">Total WBC Count</span></td><td class="cval-normal">9,630</td><td class="test-ref">/uL</td><td class="test-ref">4000–10000</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Neutrophils</span></td><td class="cval-normal">65.5</td><td class="test-ref">%</td><td class="test-ref">40–80</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Lymphocytes</span></td><td class="cval-normal">28.0</td><td class="test-ref">%</td><td class="test-ref">20–40</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Eosinophils</span></td><td class="cval-normal">2.8</td><td class="test-ref">%</td><td class="test-ref">1–6</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Monocytes</span></td><td class="cval-normal">3.2</td><td class="test-ref">%</td><td class="test-ref">2–10</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Basophils</span></td><td class="cval-normal">0.5</td><td class="test-ref">%</td><td class="test-ref">0–1</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Haemoglobin</span></td><td class="cval-low">7.9</td><td class="test-ref">g/dL</td><td class="test-ref">12–15</td><td><span class="flag-dot fd-low"></span><strong style="color:#dc2626">LOW</strong></td></tr>
-        <tr><td><span class="test-name">PCV (Haematocrit)</span></td><td class="cval-low">28.4</td><td class="test-ref">%</td><td class="test-ref">36–46</td><td><span class="flag-dot fd-low"></span><strong style="color:#dc2626">LOW</strong></td></tr>
-        <tr><td><span class="test-name">RBC Count</span></td><td class="cval-normal">4.51</td><td class="test-ref">x10⁶/µL</td><td class="test-ref">3.8–4.8</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Platelet Count</span></td><td class="cval-normal">3,27,000</td><td class="test-ref">/µL</td><td class="test-ref">1,50,000–4,10,000</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">MCV</span></td><td class="cval-low">63.0</td><td class="test-ref">fL</td><td class="test-ref">83–101</td><td><span class="flag-dot fd-low"></span><strong style="color:#dc2626">LOW</strong></td></tr>
-        <tr><td><span class="test-name">MCH</span></td><td class="cval-low">17.5</td><td class="test-ref">pg</td><td class="test-ref">27–32</td><td><span class="flag-dot fd-low"></span><strong style="color:#dc2626">LOW</strong></td></tr>
-        <tr><td><span class="test-name">MCHC</span></td><td class="cval-low">27.8</td><td class="test-ref">%</td><td class="test-ref">31.5–34.5</td><td><span class="flag-dot fd-low"></span><strong style="color:#dc2626">LOW</strong></td></tr>
-        <tr><td><span class="test-name">RDW</span></td><td class="cval-high">19.4</td><td class="test-ref">%</td><td class="test-ref">11.6–14.0</td><td><span class="flag-dot fd-high"></span><strong style="color:#d97706">HIGH</strong></td></tr>
-
-        <tr class="section-divider"><td colspan="5">🩺 Coagulation</td></tr>
-        <tr><td><span class="test-name">PT Test</span></td><td class="cval-normal">13.0</td><td class="test-ref">secs</td><td class="test-ref">8.87–13.15</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">INR</span></td><td class="cval-normal">1.19</td><td class="test-ref">—</td><td class="test-ref">0.79–1.20</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">APTT Test</span></td><td class="cval-normal">28.4</td><td class="test-ref">secs</td><td class="test-ref">24.8–40.2</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-
-        <tr class="section-divider"><td colspan="5">🧪 Biochemistry</td></tr>
-        <tr><td><span class="test-name">HbA1C</span></td><td class="cval-normal">6.4</td><td class="test-ref">%</td><td class="test-ref">4–6 Normal / 6–7 Good</td><td><span class="flag-dot fd-high"></span>Good Control</td></tr>
-        <tr><td><span class="test-name">Glucose (Random)</span></td><td class="cval-high">166</td><td class="test-ref">mg/dL</td><td class="test-ref">&lt;140</td><td><span class="flag-dot fd-high"></span><strong style="color:#d97706">HIGH</strong></td></tr>
-        <tr><td><span class="test-name">eAG (Avg. Glucose)</span></td><td class="cval-high">137</td><td class="test-ref">mg/dL</td><td class="test-ref">—</td><td>Elevated</td></tr>
-        <tr><td><span class="test-name">Urea</span></td><td class="cval-normal">25</td><td class="test-ref">mg/dL</td><td class="test-ref">16.6–48.5</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Creatinine</span></td><td class="cval-high">0.7</td><td class="test-ref">mg/dL</td><td class="test-ref">0.51–0.95</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Bicarbonate</span></td><td class="cval-normal">27.8</td><td class="test-ref">mmol/L</td><td class="test-ref">21–28</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-
-        <tr class="section-divider"><td colspan="5">🫀 Liver Function Test (LFT)</td></tr>
-        <tr><td><span class="test-name">GGT</span></td><td class="cval-normal">24.9</td><td class="test-ref">U/L</td><td class="test-ref">6–42</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Total Bilirubin</span></td><td class="cval-normal">0.2</td><td class="test-ref">mg/dL</td><td class="test-ref">&lt;1.2</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Direct Bilirubin</span></td><td class="cval-normal">0.1</td><td class="test-ref">mg/dL</td><td class="test-ref">&lt;0.3</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">SGOT / AST</span></td><td class="cval-normal">10</td><td class="test-ref">IU/L</td><td class="test-ref">10–35</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">SGPT / ALT</span></td><td class="cval-normal">13</td><td class="test-ref">IU/L</td><td class="test-ref">10–35</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Alkaline Phosphatase</span></td><td class="cval-normal">84</td><td class="test-ref">U/L</td><td class="test-ref">35–105</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Total Protein</span></td><td class="cval-normal">7.3</td><td class="test-ref">g/dL</td><td class="test-ref">6.4–8.3</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Albumin</span></td><td class="cval-normal">4.4</td><td class="test-ref">g/dL</td><td class="test-ref">3.5–5.2</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Globulins</span></td><td class="cval-normal">2.9</td><td class="test-ref">g/dL</td><td class="test-ref">2.5–3.3</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">A/G Ratio</span></td><td class="cval-normal">1.5</td><td class="test-ref">—</td><td class="test-ref">1.1–1.5</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-
-        <tr class="section-divider"><td colspan="5">⚗️ Serum Electrolytes</td></tr>
-        <tr><td><span class="test-name">Sodium</span></td><td class="cval-normal">143</td><td class="test-ref">mmol/L</td><td class="test-ref">136–145</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Potassium</span></td><td class="cval-normal">4.3</td><td class="test-ref">mmol/L</td><td class="test-ref">3.5–5.1</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">Chloride</span></td><td class="cval-normal">103</td><td class="test-ref">mmol/L</td><td class="test-ref">98–107</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-
-        <tr class="section-divider"><td colspan="5">🦠 Thyroid & Serology</td></tr>
-        <tr><td><span class="test-name">TSH</span></td><td class="cval-normal">0.816</td><td class="test-ref">µIU/mL</td><td class="test-ref">0.27–4.2</td><td><span class="flag-dot fd-normal"></span>Normal</td></tr>
-        <tr><td><span class="test-name">HIV</span></td><td class="cval-normal">Non Reactive (0.48)</td><td class="test-ref">S/CO</td><td class="test-ref">&lt;1.00</td><td><span class="flag-dot fd-normal"></span>Non Reactive</td></tr>
-        <tr><td><span class="test-name">HCV</span></td><td class="cval-normal">Non Reactive (0.10)</td><td class="test-ref">S/CO</td><td class="test-ref">&lt;1.00</td><td><span class="flag-dot fd-normal"></span>Non Reactive</td></tr>
-        <tr><td><span class="test-name">HBsAg</span></td><td class="cval-normal">Non Reactive (0.22)</td><td class="test-ref">S/CO</td><td class="test-ref">&lt;1.00</td><td><span class="flag-dot fd-normal"></span>Non Reactive</td></tr>
-        <tr><td><span class="test-name">Syphilis Ab</span></td><td class="cval-normal">Non Reactive (0.08)</td><td class="test-ref">S/CO</td><td class="test-ref">&lt;1.00</td><td><span class="flag-dot fd-normal"></span>Non Reactive</td></tr>
-      </tbody>
-    </table>
-    </div>
-    <div style="margin-top:14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 16px;font-size:13px;color:#7c2d12">
-      ⚠️ <strong>Key flags:</strong> Haemoglobin 7.9 g/dL (LOW — anaemia), PCV 28.4% (LOW), MCV 63 fL (LOW — microcytic), MCH 17.5 pg (LOW), MCHC 27.8% (LOW), RDW 19.4% (HIGH) — pattern consistent with <strong>Iron Deficiency Anaemia</strong>. Random Glucose 166 mg/dL (HIGH). All other parameters within normal limits.
+    <div class="pv">
+      <div class="pv-hdr">
+        <div class="pv-title" id="pv-title">Select a page from the list</div>
+        <div class="pv-pg" id="pv-pg">Page — / 299</div>
+      </div>
+      <div id="pdf-area" style="flex:1;display:flex;flex-direction:column;background:#1e293b;align-items:center;justify-content:center;overflow:auto;padding:10px;">
+        <img id="pdf-image" src="pdf_pages/page_1.png" style="max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 4px 12px rgba(0,0,0,0.3);border-radius:4px;display:block;">
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-</div>
+<!-- PANEL 2: SEARCH -->
+<section class="pnl" id="pnl-search">
+  <div class="s-wrap">
+    <div class="s-grid">
+      <div class="iw">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="s-q" class="fi" placeholder="Search tests, results, diagnoses, doctors..." oninput="runSearch()">
+      </div>
+      <select id="s-type" class="fi" onchange="runSearch()">
+        <option value="">All Types</option>
+        <option value="discharge">Discharge Summary</option>
+        <option value="lab">Lab Report</option>
+        <option value="hpe">HPE / Biopsy</option>
+        <option value="echo">USG / Echo</option>
+        <option value="opd">OPD</option>
+        <option value="chemo">Chemo / RT</option>
+      </select>
+      <select id="s-doc" class="fi" onchange="runSearch()">
+        <option value="">All Doctors</option>
+        <option value="Rajkumar">Dr. P. Rajkumar</option>
+        <option value="Kala">Dr. Kala K</option>
+        <option value="Dominic">Dr. Joseph Dominic</option>
+        <option value="Devi">Dr. Devi C</option>
+      </select>
+      <select id="s-sort" class="fi" onchange="runSearch()">
+        <option value="desc">Newest First</option>
+        <option value="asc">Oldest First</option>
+      </select>
+    </div>
+    <div class="d-strip">
+      <span class="d-lbl">Filter by Case:</span>
+      <button class="db on-cyst" id="db-cyst" onclick="toggleD('cyst')">&#127803; Sebaceous Cyst (Scalp)</button>
+      <button class="db on-cancer" id="db-cancer" onclick="toggleD('cancer')">&#128308; Left Breast Cancer</button>
+      <button class="db on-gynae" id="db-gynae" onclick="toggleD('gynae')">&#128151; Gynaecology Follow-up</button>
+    </div>
+    <div class="s-stat" id="s-stat">Loading...</div>
+    <div class="s-res" id="s-res"></div>
+  </div>
+</section>
+
+<!-- PANEL 3: LAB COMPARE -->
+<section class="pnl" id="pnl-compare">
+  <div class="lb-hdr">
+    <h2>&#128200; Comparative Lab Result Matrix</h2>
+    <div class="lb-ctrl">
+      <div class="iw" style="width:170px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="lab-q" class="fi" placeholder="Filter parameter..." oninput="renderLab()">
+      </div>
+      <select id="lab-pnl" class="fi" onchange="renderLab()">
+        <option value="">All Panels</option>
+        <option value="Haematology">Haematology</option>
+        <option value="Coagulation">Coagulation</option>
+        <option value="Biochemistry">Biochemistry</option>
+        <option value="Liver Function">Liver Function</option>
+        <option value="Electrolytes">Electrolytes</option>
+        <option value="Thyroid &amp; Serology">Thyroid &amp; Serology</option>
+        <option value="Cancer Markers">Cancer Markers</option>
+        <option value="Urine RE">Urine RE</option>
+      </select>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:205px">Parameter</th>
+          <th style="width:135px">Reference Range</th>
+          <th style="width:75px">Unit</th>
+          <th class="vc">22 Dec 2022<br><span style="font-size:9px;font-weight:500;text-transform:none">Pre-op Scalp</span></th>
+          <th class="vc">22 Dec 2023<br><span style="font-size:9px;font-weight:500;text-transform:none">Pre-BCS Lab</span></th>
+          <th class="vc">23 Dec 2023<br><span style="font-size:9px;font-weight:500;text-transform:none">Anaemia Panel</span></th>
+          <th class="vc">27 Dec 2023<br><span style="font-size:9px;font-weight:500;text-transform:none">Pre-Chemo</span></th>
+          <th class="vc">02 Aug 2024<br><span style="font-size:9px;font-weight:500;text-transform:none">Onco-TFT/Sug</span></th>
+          <th class="vc">05 Oct 2024<br><span style="font-size:9px;font-weight:500;text-transform:none">Hb Screen</span></th>
+          <th class="vc">05 Dec 2024<br><span style="font-size:9px;font-weight:500;text-transform:none">TFT/Glucose</span></th>
+          <th class="vc">12 Feb 2025<br><span style="font-size:9px;font-weight:500;text-transform:none">Ovarian Marker</span></th>
+          <th class="vc">12 Jun 2026<br><span style="font-size:9px;font-weight:500;text-transform:none">Thyroid/Lipid</span></th>
+        </tr>
+      </thead>
+      <tbody id="lab-tbody"></tbody>
+    </table>
+  </div>
+  <div class="legend">
+    <span><span class="ld" style="background:#16a34a"></span>Normal</span>
+    <span><span class="ld" style="background:var(--cy)"></span>High / Elevated</span>
+    <span><span class="ld" style="background:var(--ca)"></span>Low / Critical</span>
+  </div>
+</section>
+
+<!-- PANEL 4: TIMELINE -->
+<section class="pnl" id="pnl-timeline">
+  <div class="tl-hdr">
+    <h2>&#128336; Patient Clinical Case Trajectory</h2>
+    <div class="iw" style="width:210px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="tl-q" class="fi" placeholder="Search timeline..." oninput="renderTl()">
+    </div>
+  </div>
+  <div class="tl-body" id="tl-body"></div>
+</section>
+
+</div><!-- /wrap -->
 
 <script>
-const RECORDS = [
-  {
-    id:1, type:"discharge", typeLabel:"Discharge Summary", date:"2022-12-24", month:"2022-12",
-    title:"Discharge Summary — Sebaceous Cyst Scalp (Surgical Oncology)",
-    doctor:"Dr. P. Rajkumar, Dr. Kathiresan, Dr. Vidya",
-    facility:"Dr. Kamakshi Memorial Hospital",
-    tags:["Discharge","Surgery","Sebaceous Cyst","Scalp","Surgical Oncology","IP.NO: 10201/2022"],
-    render: () => `
-      <div class="ds-section">
-        <div class="ds-label">Admission & Discharge</div>
-        <div class="vitals-row">
-          <div class="vital-item"><div class="vital-label">Date of Admission</div><div class="vital-val">24 Dec 2022</div></div>
-          <div class="vital-item"><div class="vital-label">Date of Surgery</div><div class="vital-val">24 Dec 2022</div></div>
-          <div class="vital-item"><div class="vital-label">Date of Discharge</div><div class="vital-val">24 Dec 2022</div></div>
-        </div>
-      </div>
-      <div class="ds-section">
-        <div class="ds-label">Diagnosis & Procedure</div>
-        <div class="ds-content"><strong>Diagnosis:</strong> Sebaceous Cyst Scalp<br><strong>Procedure:</strong> Excision Biopsy — 24.12.2022<br><strong>Anaesthesia:</strong> General Anaesthesia (GA)</div>
-      </div>
-      <div class="ds-section">
-        <div class="ds-label">Chief Complaints</div>
-        <div class="ds-content">42-year-old Mrs. Swarnambigai presented with complaints of swelling over occipital scalp, gradually increased in size, associated with discomfort in lying down. No history of pain / discharge from swelling / trauma / fall / injury to head. Local examination: Occipito parietal scalp swelling 2×4 cm with punctum.</div>
-      </div>
-      <div class="ds-section">
-        <div class="ds-label">Past History</div>
-        <div class="ds-content"><strong>Medical:</strong> Not a known case of DM / HTN / TB / BA<br><strong>Surgical:</strong> History of LSCS done 16 years back.<br><strong style="color:#991b1b">⚠️ Drug Allergy: RANTAC (Ranitidine)</strong></div>
-      </div>
-      <div class="ds-section">
-        <div class="ds-label">Vitals at Discharge</div>
-        <div class="vitals-row">
-          <div class="vital-item"><div class="vital-label">PR</div><div class="vital-val">85/min</div></div>
-          <div class="vital-item"><div class="vital-label">BP</div><div class="vital-val">130/70 mmHg</div></div>
-          <div class="vital-item"><div class="vital-label">Local Exam</div><div class="vital-val">Wound clean & healthy</div></div>
-        </div>
-      </div>
-      <div class="ds-section">
-        <div class="ds-label">Discharge Medications</div>
-        <table class="meds-table">
-          <thead><tr><th>Medicine</th><th>Morning</th><th>Afternoon</th><th>Night</th><th>Duration</th><th>Stop Date</th></tr></thead>
-          <tbody>
-            <tr><td>Tab. Taxim O 200mg</td><td>1</td><td>0</td><td>1</td><td>5 days</td><td>29.12.2022</td></tr>
-            <tr><td>Tab. Dolo 650mg</td><td>1</td><td>0</td><td>1</td><td>5 days</td><td>29.12.2022</td></tr>
-            <tr><td colspan="6">Neosporin Ointment — For local application (daily dressing)</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="ds-section">
-        <div class="ds-label">Follow-up</div>
-        <div class="ds-content">Review with Dr. Rajkumar (Surgical Oncologist) on <strong>31.12.2022</strong> in OPD.<br>Next Review Date: 31/12/2022</div>
-      </div>
-      <div class="ds-section">
-        <div class="ds-label">Warning Signs — Contact Emergency: 044-66300300 / 71200200</div>
-        <ul class="warning-list">
-          <li>Fever of 101°F or above</li>
-          <li>Discharge from the operated site</li>
-          <li>Pain and swelling</li>
-          <li>Other significant concerns</li>
-        </ul>
-      </div>
-    `
-  },
-  {
-    id:2, type:"lab", typeLabel:"Lab Report — CBC & Full Panel", date:"2022-12-22", month:"2022-12",
-    title:"Complete Blood Count, LFT, HbA1C, Electrolytes, Serology (7 pages)",
-    doctor:"Dr. Kala K M.D., DNB (Pathology)",
-    facility:"Dr. Kamakshi Memorial Hospital — Dept. of Laboratory Services",
-    tags:["CBC","Haemoglobin","WBC","Platelets","LFT","HbA1C","TSH","Electrolytes","HIV","HCV","HBsAg","LabNo: 1385172"],
-    render: () => `
-      <div class="echo-section">🩸 Haematology — CBC</div>
-      <div class="lab-grid">
-        <div class="lab-item"><div class="lab-left"><div class="lname">Haemoglobin</div><div class="lref">Ref: 12–15 g/dL</div></div><div class="lab-right"><div class="lval low">7.9 <span class="lunit">g/dL</span></div><div class="lflag low">▼ LOW</div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Total WBC Count</div><div class="lref">Ref: 4000–10000 /uL</div></div><div class="lab-right"><div class="lval normal">9,630 <span class="lunit">/uL</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">PCV (Haematocrit)</div><div class="lref">Ref: 36–46%</div></div><div class="lab-right"><div class="lval low">28.4 <span class="lunit">%</span></div><div class="lflag low">▼ LOW</div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">RBC Count</div><div class="lref">Ref: 3.8–4.8 x10⁶/µL</div></div><div class="lab-right"><div class="lval normal">4.51 <span class="lunit">x10⁶/µL</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Platelet Count</div><div class="lref">Ref: 1,50,000–4,10,000</div></div><div class="lab-right"><div class="lval normal">3,27,000 <span class="lunit">/µL</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">MCV</div><div class="lref">Ref: 83–101 fL</div></div><div class="lab-right"><div class="lval low">63.0 <span class="lunit">fL</span></div><div class="lflag low">▼ LOW</div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">MCH</div><div class="lref">Ref: 27–32 pg</div></div><div class="lab-right"><div class="lval low">17.5 <span class="lunit">pg</span></div><div class="lflag low">▼ LOW</div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">MCHC</div><div class="lref">Ref: 31.5–34.5%</div></div><div class="lab-right"><div class="lval low">27.8 <span class="lunit">%</span></div><div class="lflag low">▼ LOW</div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">RDW</div><div class="lref">Ref: 11.6–14.0%</div></div><div class="lab-right"><div class="lval high">19.4 <span class="lunit">%</span></div><div class="lflag high">▲ HIGH</div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Neutrophils</div><div class="lref">Ref: 40–80%</div></div><div class="lab-right"><div class="lval normal">65.5 <span class="lunit">%</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Lymphocytes</div><div class="lref">Ref: 20–40%</div></div><div class="lab-right"><div class="lval normal">28.0 <span class="lunit">%</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Blood Group & Rh</div><div class="lref">—</div></div><div class="lab-right"><div class="lval normal">B <span class="lunit">Positive</span></div></div></div>
-      </div>
-      <div class="echo-section" style="margin-top:14px">🧪 Biochemistry</div>
-      <div class="lab-grid">
-        <div class="lab-item"><div class="lab-left"><div class="lname">HbA1C</div><div class="lref">Ref: 4–6% Normal</div></div><div class="lab-right"><div class="lval high">6.4 <span class="lunit">%</span></div><div class="lflag high">Good Control</div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Glucose (Random)</div><div class="lref">Ref: &lt;140 mg/dL</div></div><div class="lab-right"><div class="lval high">166 <span class="lunit">mg/dL</span></div><div class="lflag high">▲ HIGH</div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Urea</div><div class="lref">Ref: 16.6–48.5 mg/dL</div></div><div class="lab-right"><div class="lval normal">25 <span class="lunit">mg/dL</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Creatinine</div><div class="lref">Ref: 0.51–0.95 mg/dL</div></div><div class="lab-right"><div class="lval normal">0.7 <span class="lunit">mg/dL</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">TSH</div><div class="lref">Ref: 0.27–4.2 µIU/mL</div></div><div class="lab-right"><div class="lval normal">0.816 <span class="lunit">µIU/mL</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Bicarbonate</div><div class="lref">Ref: 21–28 mmol/L</div></div><div class="lab-right"><div class="lval normal">27.8 <span class="lunit">mmol/L</span></div></div></div>
-      </div>
-      <div class="echo-section" style="margin-top:14px">🫀 Liver Function Test (LFT)</div>
-      <div class="lab-grid">
-        <div class="lab-item"><div class="lab-left"><div class="lname">SGOT / AST</div><div class="lref">Ref: 10–35 IU/L</div></div><div class="lab-right"><div class="lval normal">10 <span class="lunit">IU/L</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">SGPT / ALT</div><div class="lref">Ref: 10–35 IU/L</div></div><div class="lab-right"><div class="lval normal">13 <span class="lunit">IU/L</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Alkaline Phosphatase</div><div class="lref">Ref: 35–105 U/L</div></div><div class="lab-right"><div class="lval normal">84 <span class="lunit">U/L</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Total Bilirubin</div><div class="lref">Ref: &lt;1.2 mg/dL</div></div><div class="lab-right"><div class="lval normal">0.2 <span class="lunit">mg/dL</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Total Protein</div><div class="lref">Ref: 6.4–8.3 g/dL</div></div><div class="lab-right"><div class="lval normal">7.3 <span class="lunit">g/dL</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Albumin</div><div class="lref">Ref: 3.5–5.2 g/dL</div></div><div class="lab-right"><div class="lval normal">4.4 <span class="lunit">g/dL</span></div></div></div>
-      </div>
-      <div class="echo-section" style="margin-top:14px">⚗️ Electrolytes & Serology</div>
-      <div class="lab-grid">
-        <div class="lab-item"><div class="lab-left"><div class="lname">Sodium</div><div class="lref">Ref: 136–145 mmol/L</div></div><div class="lab-right"><div class="lval normal">143 <span class="lunit">mmol/L</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Potassium</div><div class="lref">Ref: 3.5–5.1 mmol/L</div></div><div class="lab-right"><div class="lval normal">4.3 <span class="lunit">mmol/L</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">Chloride</div><div class="lref">Ref: 98–107 mmol/L</div></div><div class="lab-right"><div class="lval normal">103 <span class="lunit">mmol/L</span></div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">HIV</div><div class="lref">Non Reactive: &lt;1.00</div></div><div class="lab-right"><div class="lval normal">Non Reactive</div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">HCV</div><div class="lref">Non Reactive: &lt;1.00</div></div><div class="lab-right"><div class="lval normal">Non Reactive</div></div></div>
-        <div class="lab-item"><div class="lab-left"><div class="lname">HBsAg</div><div class="lref">Non Reactive: &lt;1.00</div></div><div class="lab-right"><div class="lval normal">Non Reactive</div></div></div>
-      </div>
-    `
-  },
-  {
-    id:3, type:"echo", typeLabel:"Echocardiogram", date:"2022-12-22", month:"2022-12",
-    title:"2D Echo with Colour Doppler (Echocardiogram Report)",
-    doctor:"Dr. T. Ashok Kumar M.D, D.M (Cardiology) — Consultant Cardiologist; Mrs. B. Jayalakshmi (Echo Technologist)",
-    facility:"Dr. Kamakshi Memorial Hospital",
-    tags:["Echo","2D Echo","Doppler","EF 70%","Cardiology","Ref: Dr. Rajkumar P","IP: 448209"],
-    render: () => `
-      <div class="echo-section">LV Study — Teicholz Method</div>
-      <div class="echo-grid">
-        <div class="echo-item"><div class="echo-param">AO (es)</div><div class="echo-val">2.7 cm</div></div>
-        <div class="echo-item"><div class="echo-param">LA (ed)</div><div class="echo-val">3.6 cm</div></div>
-        <div class="echo-item"><div class="echo-param">RVID (ed)</div><div class="echo-val">2.9 cm</div></div>
-        <div class="echo-item"><div class="echo-param">LVID (ed)</div><div class="echo-val">4.5 cm</div></div>
-        <div class="echo-item"><div class="echo-param">LVID (es)</div><div class="echo-val">2.7 cm</div></div>
-        <div class="echo-item"><div class="echo-param">IVS (ed/es)</div><div class="echo-val">1.0 / 1.1 cm</div></div>
-        <div class="echo-item"><div class="echo-param">LVPW (ed/es)</div><div class="echo-val">1.2 / 1.3 cm</div></div>
-        <div class="echo-item"><div class="echo-param">EF (Ejection Fraction)</div><div class="echo-val" style="color:#16a34a;font-size:16px">70% ✓</div></div>
-        <div class="echo-item"><div class="echo-param">FS (Fractional Shortening)</div><div class="echo-val">40%</div></div>
-      </div>
-      <div class="echo-section">2D Morphological Data</div>
-      <div class="morpho-row"><span class="morpho-name">Mitral Valve (AML/PML)</span><span class="morpho-status">Normal</span></div>
-      <div class="morpho-row"><span class="morpho-name">Aortic Valve</span><span class="morpho-status">Normal</span></div>
-      <div class="morpho-row"><span class="morpho-name">Tricuspid Valve</span><span class="morpho-status">Normal</span></div>
-      <div class="morpho-row"><span class="morpho-name">Pulmonary Valve</span><span class="morpho-status">Normal</span></div>
-      <div class="morpho-row"><span class="morpho-name">Interventricular Septum</span><span class="morpho-status">Intact</span></div>
-      <div class="morpho-row"><span class="morpho-name">Interatrial Septum</span><span class="morpho-status">Intact</span></div>
-      <div class="morpho-row"><span class="morpho-name">Aorta</span><span class="morpho-status">Normal</span></div>
-      <div class="morpho-row"><span class="morpho-name">Pulmonary Artery</span><span class="morpho-status">Normal</span></div>
-      <div class="morpho-row"><span class="morpho-name">Right Ventricle</span><span class="morpho-status">Normal</span></div>
-      <div class="morpho-row"><span class="morpho-name">Left Ventricle</span><span class="morpho-status">Normal</span></div>
-      <div class="morpho-row"><span class="morpho-name">Left Atrium</span><span class="morpho-status">Normal</span></div>
-      <div class="morpho-row"><span class="morpho-name">Pericardium</span><span class="morpho-status">No Effusion</span></div>
-      <div class="echo-section">Doppler Study</div>
-      <div class="report-box">
-        <strong>Pulse Wave Doppler:</strong> Mitral valve velocity E/A: E – 0.9 m/s, A – 0.8 m/s &nbsp;·&nbsp; MVDCET: 172 ms<br><br>
-        <strong>Continuous Wave Doppler:</strong><br>
-        Max. Velocity/gradient across Aortic Valve: 1.7 m/s — 11 mmHg<br>
-        Velocity/gradient across Pulmonic Valve: 1.3 m/s — 7 mmHg<br>
-        TR velocity up to: 1.8 m/s — 13 mmHg
-      </div>
-      <div class="echo-section">Comments</div>
-      <div class="report-box">Normal chamber dimensions · No Regional wall motion abnormality · Normal LV systolic and diastolic function · Trivial Pulmonary, Mitral and Tricuspid Regurgitation · No Pulmonary arterial Hypertension · No e/o clot (or) vegetation</div>
-      <div class="impression-box" style="margin-top:10px">
-        <div class="imp-label">Impression</div>
-        <ul>
-          <li>No Regional Wall Motion Abnormality</li>
-          <li>Normal LV Systolic and Diastolic Function</li>
-        </ul>
-      </div>
-    `
-  },
-  {
-    id:4, type:"radiology", typeLabel:"Radiology — CT Brain", date:"2022-12-22", month:"2022-12",
-    title:"CT Brain — Plain (Without Contrast)",
-    doctor:"Dr. Madhumita C, MD (RD), FVIR — Interventional Radiologist",
-    facility:"Dr. Kamakshi Memorial Hospital",
-    tags:["CT Brain","Radiology","Sebaceous Cyst","Scalp","UHID: 448209","Accession: 11336113"],
-    render: () => `
-      <div class="report-box">
-        <strong>Technique:</strong> Serial axial sections from base of skull to vertex without contrast. Base 5mm, Cerebrum 5mm.<br><br>
-        <strong>Findings:</strong><br>
-        • No abnormal density in the cerebral hemispheres<br>
-        • No evidence of mass lesion or hemorrhage<br>
-        • Gray white differentiation is maintained<br>
-        • Cerebellum, brainstem and basal cisterns appear normal<br>
-        • Basal cisterns show normal CSF density<br>
-        • Cerebello pontine angles and internal auditory meatus appear normal<br>
-        • Ventricular system and sulci are normal for the age<br>
-        • Sella and parasellar regions are normal<br>
-        • Basal ganglia, thalami and capsular tracts appear normal<br>
-        • Bones of the cranium appear normal<br><br>
-        <strong style="color:#7c3aed">A well defined lobulated soft tissue density lesion (60 HU) measuring 4.1 × 4.1 cm with few calcific foci noted arising from right high parietal scalp.</strong><br>
-        <strong>No evidence of adjacent bony erosion / intracranial involvement.</strong><br>
-        Mucosal thickening noted in left maxillary sinus.
-      </div>
-      <div class="impression-box">
-        <div class="imp-label">Impression</div>
-        <ul>
-          <li><strong>A well defined lobulated soft tissue density lesion with few calcific foci arising from right high parietal scalp — Sebaceous Cyst.</strong></li>
-          <li>No significant abnormality in brain parenchyma.</li>
-        </ul>
-      </div>
-    `
-  },
-  {
-    id:5, type:"ecg", typeLabel:"ECG", date:"2022-12-22", month:"2022-12",
-    title:"12-Lead ECG (Electrocardiogram)",
-    doctor:"Dr. Kamakshi Memorial Hospital",
-    facility:"Dr. Kamakshi Memorial Hospital",
-    tags:["ECG","Sinus Rhythm","Normal ECG","HR 83","Mrs. Swarnambigai"],
-    render: () => `
-      <div class="ecg-result">✅ SINUS RHYTHM — NORMAL ECG</div>
-      <div class="echo-section" style="margin-top:14px">ECG Parameters</div>
-      <div class="ecg-grid">
-        <div class="ecg-item"><div class="ecg-param">Heart Rate</div><div class="ecg-val">83 bpm</div></div>
-        <div class="ecg-item"><div class="ecg-param">RR Interval</div><div class="ecg-val">724 ms</div></div>
-        <div class="ecg-item"><div class="ecg-param">P Wave</div><div class="ecg-val">98 ms</div></div>
-        <div class="ecg-item"><div class="ecg-param">PR Interval</div><div class="ecg-val">134 ms</div></div>
-        <div class="ecg-item"><div class="ecg-param">QRS Duration</div><div class="ecg-val">82 ms</div></div>
-        <div class="ecg-item"><div class="ecg-param">QT Interval</div><div class="ecg-val">370 ms</div></div>
-        <div class="ecg-item"><div class="ecg-param">QTc</div><div class="ecg-val">435 ms</div></div>
-        <div class="ecg-item"><div class="ecg-param">P Axis</div><div class="ecg-val">36°</div></div>
-        <div class="ecg-item"><div class="ecg-param">QRS Axis</div><div class="ecg-val">6°</div></div>
-        <div class="ecg-item"><div class="ecg-param">T Axis</div><div class="ecg-val">14°</div></div>
-        <div class="ecg-item"><div class="ecg-param">Sokolow Index</div><div class="ecg-val">2.78 mV</div></div>
-        <div class="ecg-item"><div class="ecg-param">R(V5)</div><div class="ecg-val">1.62 mV</div></div>
-      </div>
-    `
+/* ===== THEME ===== */
+var theme = (localStorage.getItem('sw-theme') || 'light');
+document.documentElement.setAttribute('data-theme', theme);
+
+function toggleTheme() {
+  theme = (theme === 'light') ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('sw-theme', theme);
+  document.getElementById('tbtn').textContent = (theme === 'dark') ? '\u2600\uFE0F' : '\uD83C\uDF19';
+}
+
+/* ===== TABS ===== */
+var TABS = ['browser','search','compare','timeline'];
+function showTab(id) {
+  for (var i = 0; i < TABS.length; i++) {
+    var t = TABS[i];
+    var btn = document.getElementById('tab-' + t);
+    var pnl = document.getElementById('pnl-' + t);
+    if (btn) btn.className = 'tab' + (t === id ? ' on' : '');
+    if (pnl) pnl.className = 'pnl' + (t === id ? ' on' : '');
   }
-];
-
-let openId = null;
-let sortAsc = true;
-
-
-function getFiltered() {
-  var q = document.getElementById("search-input").value.toLowerCase();
-  var type = document.getElementById("type-filter").value;
-  var month = document.getElementById("date-filter").value;
-  var filtered = RECORDS.filter(function(r) {
-    var typeMatch = type === "all" || r.type === type;
-    var monthMatch = !month || r.month === month;
-    var searchStr = [r.title, r.doctor, r.typeLabel].concat(r.tags).join(" ").toLowerCase();
-    var qMatch = !q || searchStr.indexOf(q) !== -1;
-    return typeMatch && monthMatch && qMatch;
-  });
-  filtered.sort(function(a, b) {
-    return sortAsc ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
-  });
-  return filtered;
 }
 
-function renderRecords(list) {
-  var container = document.getElementById("record-list");
-  var noResult = document.getElementById("no-result");
-  container.innerHTML = "";
-  if (!list.length) { noResult.style.display = "block"; return; }
-  noResult.style.display = "none";
-  var lastMonth = "";
-  list.forEach(function(r) {
-    var d = new Date(r.date);
-    var mk = d.toLocaleDateString("en-IN", {year:"numeric",month:"long"});
-    if (mk !== lastMonth) {
-      var lbl = document.createElement("div");
-      lbl.className = "month-label";
-      lbl.textContent = mk;
-      container.appendChild(lbl);
-      lastMonth = mk;
+/* ===== PAGE DATA ===== */
+var PAGES = [];
+function addPages(nums, date, doc, type, tLbl, dis, dLbl, title, desc) {
+  for (var i = 0; i < nums.length; i++) {
+    PAGES.push({n:nums[i], date:date, doc:doc, type:type, tLbl:tLbl, dis:dis, dLbl:dLbl, title:title, desc:desc});
+  }
+}
+addPages([1, 2, 3],'24 Dec 2022','Dr. P. Rajkumar','discharge','Discharge','cyst','Sebaceous Cyst','Discharge Summary — Excision of Scalp Cyst','Same-day surgery under GA for occipito-parietal scalp cyst excision. IP No: 10201/2022.');
+addPages([4, 5, 6, 7, 8, 9, 10],'22 Dec 2022','Dr. Kala K','lab','Lab Report','cyst','Sebaceous Cyst','Pre-op Lab Panel — Full Workup','CBC, LFT, HbA1c, thyroid, random glucose, infectious serology — pre-operative investigation.');
+addPages([11, 12],'22 Dec 2022','Dr. T. Ashok Kumar','echo','Echo/USG','cyst','Sebaceous Cyst','2D Echo Colour Doppler','EF 70%, normal LV systolic/diastolic, trivial MR/TR/PR. Baseline cardiac assessment.');
+addPages([13, 14, 15, 16],'22 Dec 2022','Dr. Madhumita C','radiology','CT/Radiology','cyst','Sebaceous Cyst','CT Brain Plain — Scalp Cyst Confirmation','Right parietal scalp sebaceous cyst 4.1x4.1 cm with calcified foci; no intracranial extension.');
+addPages([17],'22 Dec 2022','KMH Cardiology','ecg','ECG','cyst','Sebaceous Cyst','12-Lead ECG Strip','Sinus rhythm, HR 83 bpm, normal cardiac electrical axis.');
+addPages([18, 19],'31 Dec 2022','Dr. P. Rajkumar','opd','OPD Sheet','cyst','Sebaceous Cyst','Post-op OPD Review — Wound Check','Sutures removed, wound clean and clear. Discharged from follow-up.');
+addPages([20, 21],'25 Nov 2023','Sri Chakra Scans','echo','Echo/USG','cancer','Breast Cancer','USG Left Breast and Axillary Scan','Solid hypervascular nodule 1.0 cm upper outer quadrant left breast. BIRADS 4B. Biopsy recommended.');
+addPages([22],'15 Feb 2025','Dr. P. Rajkumar','opd','OPD Sheet','gynae','Gynae Follow-up','OPD Assessment — Endometrial Pipelle Review','CA-125 normal (11.99). Pipelle biopsy benign (endometrial polyp). Tamoxifen ongoing.');
+addPages([23, 24],'12 Dec 2023','Dr. Kala K','hpe','HPE/Biopsy','cancer','Breast Cancer','Left Breast Trucut Biopsy HPE','Invasive Breast Carcinoma NST, Histological Grade 3. Malignancy confirmed.');
+addPages([25],'21 Dec 2023','Dr. Kala K','hpe','HPE/Biopsy','cancer','Breast Cancer','Immunohistochemistry (IHC) Receptor Profile','ER Positive (90%), PR Positive (75%), HER2 Positive (3+). Triple-positive receptor profile.');
+addPages([26, 27, 28, 29],'18 Dec 2023','KMH Nuclear Medicine','radiology','CT/Radiology','cancer','Breast Cancer','PET-CT Whole Body — Oncology Staging','FDG-avidity SUVmax 12.9, left breast primary. No distant metastasis. pT1c N0 M0.');
+addPages([30, 31, 32, 33, 34, 35, 36],'22 Dec 2023','Dr. Kala K','lab','Lab Report','cancer','Breast Cancer','Pre-BCS Surgery Lab Panel','CBC, Coagulation, Biochemistry, LFT, Electrolytes, serology. Pre-admission screening.');
+addPages([37, 38],'22 Dec 2023','Dr. T. Ashok Kumar','echo','Echo/USG','cancer','Breast Cancer','2D Echo — Pre-BCS Cardiac Clearance','EF 70%, LVH noted, GLPS -19% normal. Pre-surgery cardiac clearance.');
+addPages([39],'22 Dec 2023','KMH Cardiology','ecg','ECG','cancer','Breast Cancer','12-Lead ECG — Pre-BCS Fitness','Sinus rhythm HR 84 bpm. Cardiac fitness confirmed.');
+addPages([40],'27 Dec 2023','Dr. Joseph Dominic','opd','OPD Sheet','cancer','Breast Cancer','OPD — Severe Anaemia Management','Ferritin 3.07, Hb 7.8. Iron-deficiency anaemia. IV Iron Carboxymaltose prescribed.');
+addPages([41, 42, 43, 44, 45],'05 Jan 2024','Dr. P. Rajkumar','discharge','Discharge','cancer','Breast Cancer','Discharge Summary — BCS + SLNB (Left Breast)','BCS + SLNB 04 Jan 2024. Clear margins, 5 negative sentinel nodes (pN0). Post-op care plan.');
+addPages([46, 47],'10 Jan 2024','Dr. Kala K','hpe','HPE/Biopsy','cancer','Breast Cancer','Surgical Specimen Histopathology','Clear margins, pT1c, DCIS component. 5 sentinel nodes negative. Final pathology report.');
+addPages([48],'11 Jan 2024','Dr. P. Rajkumar','opd','OPD Sheet','cancer','Breast Cancer','Oncology OPD — Post-op HPE Review','Clear margins confirmed. Adjuvant chemotherapy planned.');
+addPages([49],'06 Mar 2024','Dr. P. Rajkumar','opd','OPD Sheet','cancer','Breast Cancer','OPD Review — Chemo Cycle 2 Assessment','Cycle 2 AC completed. Tolerating therapy. Axilla clear. Next cycle scheduled.');
+addPages([50, 51],'07 Feb 2025','Dr. Afrah / Dr. Suhara','echo','Echo/USG','gynae','Gynae Follow-up','USG Abdomen and TVS Scan','Endometrial thickening 13.3mm. Three complex ovarian cysts. Gynaecology review advised.');
+addPages([52],'12 Feb 2025','Dr. Devi C','opd','OPD Sheet','gynae','Gynae Follow-up','Gynaecology OPD — Endometrial Evaluation','Pipelle endometrial biopsy sampling performed.');
+addPages([53],'12 Feb 2025','Dr. Kala K','lab','Lab Report','gynae','Gynae Follow-up','Serum CA-125 Tumour Marker','CA-125: 11.99 U/ml (Normal). No evidence of active ovarian malignancy.');
+addPages([54],'14 Feb 2025','Dr. Kala K','hpe','HPE/Biopsy','gynae','Gynae Follow-up','Pipelle Biopsy Histopathology','Benign endometrial polyp. No hyperplasia or malignancy.');
+addPages([55],'09 May 2025','Dr. P. Rajkumar','opd','OPD Sheet','gynae','Gynae Follow-up','OPD — GnRH Suppression Discussion','GnRH analogue vs laparoscopic oophorectomy options discussed. Patient prefers medical.');
+addPages([56, 57, 58, 59, 60, 61, 62, 63, 64, 65],'Feb–May 2024','Dr. P. Rajkumar','chemo','Chemo/RT','cancer','Breast Cancer','Adjuvant Chemotherapy Session Logs (1–10)','Chemotherapy flowsheets and drug calculation protocols for adjuvant cytotoxic regimens.');
+addPages([66, 67, 68, 69, 70, 71, 72, 73, 74, 75],'May–Jul 2024','Onco-Radiotherapy Dept','chemo','Chemo/RT','cancer','Breast Cancer','Radiotherapy Dose Calculation Sheets (1–10)','Adjuvant external beam radiation therapy planning cards and daily dosage fraction records.');
+addPages([76, 77, 78, 79, 80, 81, 82, 83, 84, 85],'Jul–Dec 2024','Dr. P. Rajkumar','opd','OPD Sheet','cancer','Breast Cancer','Prescriptions and Follow-up Notes (1–10)','Prescriptions, supportive medications, calcium supplements, clinic review sheets.');
+addPages([86, 87, 88, 89, 90, 91, 92, 93, 94, 95],'Jan–Dec 2024','Dr. Kala K','lab','Lab Report','cancer','Breast Cancer','Chemotherapy Toxicity Blood Panels (1–10)','CBC and LFT panels monitoring bone marrow toxicity during chemotherapy cycles.');
+addPages([96, 97, 98, 99, 100, 101, 102, 103, 104, 105],'May 2025','Dr. Joseph Dominic','opd','OPD Sheet','gynae','Gynae Follow-up','GnRH Medical Ovarian Suppression Planning (1–10)','Referral consult sheets for GnRH analogue (Zoladex) medical suppression.');
+addPages([106, 107, 108, 109, 110],'May 2025','Dr. P. Rajkumar','other','Misc','gynae','Gynae Follow-up','Miscellaneous Medical Records','Patient correspondence, clinical checklists, medical receipts and admin records.');
+addPages([111],'15 Jun 2026','Dr. Joseph Dominic','discharge','Discharge','gynae','Gynae Follow-up','Discharge Summary — Day Care Inj. Triptorelin (June 2026)','Admitted for day care depot Inj. Triptorelin 11.25mg IM (GnRH suppression) under Dr. Joseph Dominic. Discharged in stable condition.');
+addPages([112, 113, 114],'12 Jun 2026','Dr. T. P. Ravi','echo','Echo/USG','gynae','Gynae Follow-up','USG Neck & Thyroid — Multinodular Goiter TIRADS III','Right lobe and isthmus enlarged with a well-defined nodule measuring 3.8x2.9 cm; left lobe nodule 1.6x0.9 cm. No cervical lymphadenopathy.');
+addPages([115, 116, 117, 118],'12 Jun 2026','Dr. Sharmila S','lab','Lab Report','gynae','Gynae Follow-up','Comprehensive Outpatient Lab Panel (June 2026)','HbA1c 6.4%, FBS 122.4, PPBS 198.6 (impaired glucose tolerance). Lipid Profile: Cholesterol 170, Triglycerides 233.89 (elevated), HDL 37.47 (low), LDL 85.75. TSH 2.15, Free T3/T4 normal.');
+addPages([119, 120],'15 Jun 2026','Dr. Geethalakshmi S','opd','OPD Sheet','gynae','Gynae Follow-up','OPD Oncology/Endocrine Review — Thyroid Nodule Assessment','Consultation for thyroid nodule / multinodular goiter follow-up. Vital signs stable, plan for clinical correlation.');
+addPages([121, 122],'15 Mar 2026','Dr. Joseph Dominic','opd','OPD Sheet','gynae','Gynae Follow-up','OPD Oncology Review — Triptorelin Cycle 4 Depot Assessment','Clinical review and prescription for depot Inj. Triptorelin 11.25mg. Blood pressure 120/80 mmHg, pain score 0/10.');
+addPages([123, 124],'15 Mar 2026','Dr. Joseph Dominic','chemo','Chemo/RT','gynae','Gynae Follow-up','Day Care Chart — Inj. Triptorelin Depot Cycle 4','Weight 61.1 kg, BSA 1.65. Adjuvant Triptorelin 11.25mg IM administered. Vital parameters stable.');
+addPages([125, 126],'15 Dec 2025','Dr. Joseph Dominic','opd','OPD Sheet','gynae','Gynae Follow-up','OPD Oncology Review — Triptorelin Cycle 3 Depot Planning','Follow-up assessment and planning for 3rd dose of Triptorelin. Vital signs monitored, prescriptions ongoing.');
+addPages([127, 128],'15 Dec 2025','Dr. Joseph Dominic','chemo','Chemo/RT','gynae','Gynae Follow-up','Day Care Chart — Inj. Triptorelin Depot Cycle 3','Weight 69.8 kg, BSA 1.65. Adjuvant Triptorelin 11.25mg IM administered.');
+addPages([129, 130],'15 Sep 2025','Dr. Joseph Dominic','chemo','Chemo/RT','gynae','Gynae Follow-up','Day Care Chart — Inj. Triptorelin Depot Cycle 2','Weight 69.0 kg, BSA 1.66. Adjuvant Triptorelin 11.25mg IM administered.');
+addPages([131, 132],'08 Oct 2025','Dr. Joseph Dominic','opd','OPD Sheet','gynae','Gynae Follow-up','OPD Oncology Review — Triptorelin Follow-up & Thyroid Check','Review for amenorrhea and thyroid nodule. Triptorelin ongoing, vital parameters stable.');
+addPages([133, 134],'22 Feb 2025','Dr. Geethalakshmi S','opd','OPD Sheet','gynae','Gynae Follow-up','OPD Gynaecology/Oncology Review — Thyroid Goiter Assessment','Outpatient assessment form by Dr. Geethalakshmi S. Nodule 3.8x2.9 cm noted in right lobe. Plan for clinical correlation.');
+addPages([135, 136],'15 Jun 2025','Dr. Joseph Dominic','chemo','Chemo/RT','gynae','Gynae Follow-up','Day Care Chart — Inj. Triptorelin Depot Cycle 1','Weight 69.0 kg, BSA 1.65. Adjuvant Triptorelin 11.25mg IM administered. First dose of medical suppression.');
+addPages([137, 138],'15 Jun 2025','Dr. Joseph Dominic','opd','OPD Sheet','gynae','Gynae Follow-up','OPD Oncology Review — Triptorelin Cycle 1 Initiation','Consultation regarding initiation of medical ovarian suppression. Discussion of side effects, Tamoxifen ongoing.');
+addPages([139, 140],'15 Jun 2025','Dr. Joseph Dominic','chemo','Chemo/RT','gynae','Gynae Follow-up','Day Care Chart — Inj. Triptorelin Depot Cycle 1 (Admin Log)','Weight 68.2 kg, BSA 1.66. Depot Triptorelin 11.25mg intramuscular injection given.');
+addPages([141, 142],'07 Feb 2025','Dr. Joseph Dominic','opd','OPD Sheet','cancer','Breast Cancer','OPD Oncology Review — Simple Breast Cyst Assessment','Post-operative changes, simple cyst in breast. Discussion of mammography results, Tamoxifen ongoing.');
+addPages([143, 144],'07 Feb 2025','Dr. Priya N','echo','Echo/USG','cancer','Breast Cancer','3D Digital Mammography with Tomosynthesis & USG Correlation','Bilateral screening shows heterogeneously dense breast (Category C). Rim calcifications, left simple cysts, post-op changes. No signs of recurrence.');
+addPages([145, 146, 147, 148, 149, 150, 151, 152],'16 Jan 2025','Dr. Joseph Dominic','lab','Lab Report','cancer','Breast Cancer','MedGenome Hereditary Cancer Gene Panel — BRCA Negative','Comprehensive 158-gene cancer panel by NGS & MLPA. No pathogenic variants detected. BRCA1 and BRCA2 negative status confirmed.');
+addPages([153, 154],'14 Jan 2025','Dr. Joseph Dominic','chemo','Chemo/RT','cancer','Breast Cancer','Day Care Chart — Adjuvant Trastuzumab (Cycle 17)','Weight 69.1 kg, BSA 1.65. Adjuvant Trastuzumab administered under medical oncology.');
+addPages([155],'14 Jan 2025','Dr. Joseph Dominic','opd','OPD Sheet','cancer','Breast Cancer','OPD Oncology Prescription — Tamoxifen & Supportive Care','Prescription for Tamoxifen 20mg, Calten-D, Dulcolax, Metosartan 40mg. Review after 1 month.');
+addPages([156, 157, 158],'26 Dec 2024','Dr. Joseph Dominic','echo','Echo/USG','cancer','Breast Cancer','2D Echo Colour Doppler — Herceptin Cardiac Surveillance','EF 74%. Normal chamber dimensions, structurally normal valves, Grade I diastolic dysfunction. No clot or pericardial effusion.');
+addPages([159, 160],'05 Dec 2024','Dr. Joseph Dominic','opd','OPD Sheet','cancer','Breast Cancer','OPD Oncology Prescription — Tamoxifen and Metosartan','Routine prescription for Tamoxifen 20mg, Calten-D, Dulcolax, Metosartan 40mg.');
+addPages([161, 162],'24 Dec 2024','Dr. Joseph Dominic','chemo','Chemo/RT','cancer','Breast Cancer','Day Care Chart — Adjuvant Trastuzumab (Cycle 16)','Weight 69.6 kg, BSA 1.65. Adjuvant Trastuzumab administered. Normal vital parameters.');
+addPages([163, 164, 165],'05 Dec 2024','Dr. Geethalakshmi S','lab','Lab Report','cancer','Breast Cancer','Comprehensive Outpatient Lab Panel (Dec 2024)','HbA1c 6.5%, FBS 118.4, PPBS 224.2. Free TFT: TSH 1.23, Free T3/T4 normal.');
+addPages([166, 167],'16 Nov 2024','Dr. Joseph Dominic','opd','OPD Sheet','cancer','Breast Cancer','OPD Oncology Review — Trastuzumab Cycle 14 Follow-up','Assessment post-Cycle 14. Vital parameters normal, plan for Cycle 15 Trastuzumab daycare.');
+addPages([168, 169],'03 Dec 2024','Dr. Joseph Dominic','chemo','Chemo/RT','cancer','Breast Cancer','Day Care Chart — Adjuvant Trastuzumab (Cycle 15)','Weight 69.8 kg, BSA 1.65. Adjuvant Trastuzumab administered.');
+addPages([171, 172],'12 Nov 2024','Dr. Joseph Dominic','chemo','Chemo/RT','cancer','Breast Cancer','Day Care Chart — Adjuvant Trastuzumab (Cycle 14)','Weight 70.3 kg, BSA 1.65. Adjuvant Trastuzumab administered.');
+addPages([174, 175],'22 Oct 2024','Dr. Joseph Dominic','chemo','Chemo/RT','cancer','Breast Cancer','Day Care Chart — Adjuvant Trastuzumab (Cycle 13)','Weight 73.6 kg, BSA 1.65. Adjuvant Trastuzumab administered.');
+addPages([176],'05 Oct 2024','Dr. Joseph Dominic','lab','Lab Report','cancer','Breast Cancer','Outpatient Lab Report — Haemoglobin Screening','Haemoglobin 10.1 g/dL (low, mild persistent anaemia). WBC 9630/uL normal. Platelets 354k normal.');
+addPages([177, 178, 179],'26 Sep 2024','Dr. Srinivasan V','echo','Echo/USG','cancer','Breast Cancer','2D Echo Colour Doppler — LVEF 62% Cardiac Check','EF 62%. Normal chamber dimensions, structurally and functionally normal valves. Normal LV systolic function.');
+addPages([180, 181, 182, 183],'26 Sep 2024','Dr. Sujeeth S','echo','Echo/USG','cancer','Breast Cancer','USG Abdomen and TVS Scan — Fatty Liver & Ovarian Cysts','Grade I Fatty Liver, Polycystic Ovaries, thickened endometrium (13.3mm) and complex ovarian cysts. TVS screening.');
+addPages([184],'26 Sep 2024','Dr. Joseph Dominic','opd','OPD Sheet','cancer','Breast Cancer','OPD Oncology Prescription — Tamoxifen & Dulcolax','Routine prescription for Tamoxifen 20mg, Calten-D, Dulcolax, Metosartan 40mg.');
+addPages([185, 186],'14 Sep 2024','Dr. Joseph Dominic','chemo','Chemo/RT','cancer','Breast Cancer','Day Care Chart — Adjuvant Trastuzumab (Cycle 12)','Weight 71.3 kg, BSA 1.65. Adjuvant Trastuzumab administered.');
+addPages([187, 190, 202],'20 Aug 2024','Dr. Joseph Dominic','opd','OPD Sheet','cancer','Breast Cancer','OPD Oncology Prescriptions — Ongoing Herceptin Support','OPD medication orders for supportive care and Tamoxifen 20mg daily.');
+addPages([188, 189],'10 Sep 2024','Dr. Joseph Dominic','chemo','Chemo/RT','cancer','Breast Cancer','Day Care Chart — Adjuvant Trastuzumab (Cycle 11)','Weight 71.3 kg, BSA 1.65. Adjuvant Trastuzumab administered.');
+addPages([191, 192],'20 Aug 2024','Dr. Joseph Dominic','chemo','Chemo/RT','cancer','Breast Cancer','Day Care Chart — Adjuvant Trastuzumab (Cycle 10)','Weight 71.6 kg, BSA 1.65. Adjuvant Trastuzumab administered.');
+addPages([193, 194, 195],'02 Aug 2024','Dr. Geethalakshmi S','lab','Lab Report','cancer','Breast Cancer','Comprehensive Outpatient Lab Panel (Aug 2024)','HbA1c 7.1%, eAG 157 (elevated). FBS 112.7, PPBS 213.9. Free TFT: TSH 0.77, Free T3/T4 normal.');
+addPages([196, 197],'02 Aug 2024','Dr. Madhumita C','hpe','HPE/Biopsy','gynae','Gynae Follow-up','USG Guided FNAC Left Thyroid Nodule','Fine needle aspiration biopsy of left thyroid nodule (10 slides cytopathology). Suggestive of colloid nodule / colloid goiter.');
+addPages([198, 199, 200, 201],'30 Jul 2024','Dr. Joseph Dominic','echo','Echo/USG','cancer','Breast Cancer','2D Echo Colour Doppler — Cardiac Check post-RT','EF 65%. Normal chamber dimensions, normal LV systolic and diastolic function, no wall motion abnormalities.');
+addPages([203, 204],'30 Jul 2024','Dr. Joseph Dominic','chemo','Chemo/RT','cancer','Breast Cancer','Day Care Chart — Adjuvant Trastuzumab (Cycle 9)','Weight 71.3 kg, BSA 1.65. Adjuvant Trastuzumab maintenance initiated post-RT.');
+addPages([205, 206],'30 Jul 2024','Dr. Joseph Dominic','opd','OPD Sheet','cancer','Breast Cancer','OPD Oncology Review — Initiation of Trastuzumab Maintenance','Initial clinical assessment for post-RT Trastuzumab. Planning for 3-weekly maintenance schedule.');
+addPages([207],'10 Jul 2024','Dr. V. Srinivasan','discharge','Discharge','cancer','Breast Cancer','Radiation Oncology Discharge Summary — Adjuvant Radiotherapy','IMRT + ABC radiotherapy course (11 June to 10 July 2024). Delivered 40Gy to PTV in 15 fractions to left breast & SCL + 10Gy in 5 fractions boost to scar. Elekta Infinity accelerator. Stable discharge.');
+addPages([208, 209, 210],'10 Jul 2024','Dr. V. Srinivasan','chemo','Chemo/RT','cancer','Breast Cancer','Day Care Chart — Radiotherapy Post-Treatment Prescriptions','Medications prescribed at discharge: Dolo 650mg, Dulcolax, Metosartan 40mg.');
+addPages([211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299], 'Unspecified', 'Unspecified', 'other', 'Misc', 'other', 'Unspecified', 'Miscellaneous / Scanned Records', 'Scanned prescriptions, daily vitals sheets, receipts, and clinical records without digital text.');
+
+/* ===== PDF BROWSER ===== */
+var sortAsc = true;
+var selPg = 1;
+
+function parseDate(dateStr) {
+  if (!dateStr || dateStr === 'Unspecified') return new Date(9999, 11, 31); // Put unclassified pages at the very end
+  
+  // Clean ranges like "Feb–May 2024" or "May–Jul 2024" by taking the first part
+  var cleaned = dateStr.split('–')[0].split('—')[0]; 
+  
+  var parts = cleaned.trim().split(' ');
+  var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  if (parts.length === 3) {
+    var day = parseInt(parts[0]);
+    var monthName = parts[1].substring(0, 3);
+    monthName = monthName.charAt(0).toUpperCase() + monthName.slice(1).toLowerCase();
+    var year = parseInt(parts[2]);
+    var month = months.indexOf(monthName);
+    if (month !== -1) {
+      return new Date(year, month, day);
     }
-    var card = document.createElement("div");
-    card.className = "record-card" + (openId === r.id ? " open" : "");
-    var isOpen = openId === r.id;
-    var rid = r.id;
-    card.innerHTML =
-      '<div class="record-header" onclick="toggleCard(' + rid + ')">' +
-        '<div style="display:flex;gap:10px;flex:1;align-items:flex-start">' +
-          '<span class="rtype rtype-' + r.type + '">' + r.typeLabel + '</span>' +
-          '<div style="flex:1">' +
-            '<div class="rtitle">' + r.title + '</div>' +
-            '<div class="rmeta">' +
-              '<span>📅 ' + new Date(r.date).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}) + '</span>' +
-              '<span>👨‍⚕️ ' + r.doctor + '</span>' +
-              '<span>🏥 ' + r.facility + '</span>' +
-            '</div>' +
-            '<div class="tag-row">' + r.tags.map(function(t){return '<span class="tag">'+t+'</span>';}).join("") + '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="chevron">⌄</div>' +
-      '</div>' +
-      '<div class="record-body" style="display:' + (isOpen ? 'block' : 'none') + '">' + (isOpen ? r.render() : '') + '</div>';
-    container.appendChild(card);
+  }
+  
+  // If month + year only (e.g. "May 2025")
+  if (parts.length === 2) {
+    var monthName = parts[0].substring(0, 3);
+    monthName = monthName.charAt(0).toUpperCase() + monthName.slice(1).toLowerCase();
+    var year = parseInt(parts[1]);
+    var month = months.indexOf(monthName);
+    if (month !== -1) {
+      return new Date(year, month, 1);
+    }
+  }
+  
+  var yearMatch = dateStr.match(/\d{4}/);
+  var year = yearMatch ? parseInt(yearMatch[0]) : 9999;
+  for (var m = 0; m < months.length; m++) {
+    if (dateStr.indexOf(months[m]) >= 0) {
+      return new Date(year, m, 1);
+    }
+  }
+  return new Date(year, 0, 1);
+}
+
+function renderPages() {
+  var q = (document.getElementById('pg-q').value || '').toLowerCase();
+  var dis = document.getElementById('pg-dis').value;
+  var type = document.getElementById('pg-type').value;
+
+  var filtered = PAGES.filter(function(p) {
+    if (dis && p.dis !== dis) return false;
+    if (type && p.type !== type) return false;
+    if (q) {
+      var text = (p.title + ' ' + p.desc + ' ' + p.doc + ' ' + p.date).toLowerCase();
+      if (text.indexOf(q) < 0) return false;
+    }
+    return true;
   });
+
+  filtered.sort(function(a, b) {
+    return sortAsc ? a.n - b.n : b.n - a.n;
+  });
+
+  document.getElementById('pg-cnt').textContent = filtered.length + ' of 299 pages';
+
+  var list = document.getElementById('pg-list');
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty">No pages match your filters.</div>';
+    return;
+  }
+
+  var h = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var p = filtered[i];
+    var sel = (p.n === selPg);
+    h += '<div class="pc' + (sel ? ' sel' : '') + '" onclick="goPage(' + p.n + ')">' +
+      '<div class="pc-top"><span class="pn">Pg ' + p.n + '</span><span class="tt tt-' + p.type + '">' + p.tLbl + '</span></div>' +
+      '<div class="pc-title">' + p.title + '</div>' +
+      '<div class="pc-desc">' + p.desc + '</div>' +
+      '<div class="pc-meta"><span>&#128197; ' + p.date + '</span><span style="color:var(--' + (p.dis === 'cyst' ? 'cy' : p.dis === 'cancer' ? 'ca' : 'gy') + ')">' + p.dLbl + '</span></div>' +
+      '</div>';
+  }
+  list.innerHTML = h;
+
+  var selEl = list.querySelector('.sel');
+  if (selEl) selEl.scrollIntoView({block:'nearest'});
 }
 
-function toggleCard(id) {
-  openId = (openId === id ? null : id);
-  renderFiltered();
-}
-
-function filterRecords() { renderFiltered(); }
-
-function renderFiltered() { renderRecords(getFiltered()); }
-
-function switchTab(tab) {
-  document.getElementById("tab-btn-history").className = "tab" + (tab === "history" ? " active" : "");
-  document.getElementById("tab-btn-comparison").className = "tab" + (tab === "comparison" ? " active" : "");
-  document.getElementById("tab-history").style.display = tab === "history" ? "block" : "none";
-  document.getElementById("tab-comparison").style.display = tab === "comparison" ? "block" : "none";
-  return false;
+function goPage(n) {
+  selPg = n;
+  var img = document.getElementById('pdf-image');
+  if (img) {
+    img.src = 'pdf_pages/page_' + n + '.png';
+  }
+  var pg = null;
+  for (var i = 0; i < PAGES.length; i++) { if (PAGES[i].n === n) { pg = PAGES[i]; break; } }
+  if (pg) {
+    document.getElementById('pv-title').textContent = pg.title;
+    document.getElementById('pv-pg').textContent = 'Page ' + n + ' / 299';
+  }
+  renderPages();
 }
 
 function toggleSort() {
   sortAsc = !sortAsc;
-  document.getElementById("sort-btn").textContent = sortAsc ? "⬆ Oldest First" : "⬇ Newest First";
-  renderFiltered();
-  return false;
+  document.getElementById("sort-btn").innerHTML = sortAsc ? "Page 1&#8594;299 &#8595;" : "Page 299&#8594;1 &#8593;";
+  renderPages();
 }
 
-function handleFiles(files) {
-  if (!files.length) return;
-  var notice = document.getElementById("added-notice");
-  notice.style.display = "block";
-  notice.innerHTML = Array.from(files).map(function(f) {
-    return '<div class="added-file-notice">✅ <strong>' + f.name + '</strong> added (' + (f.size/1024).toFixed(0) + ' KB)</div>';
-  }).join("");
+/* ===== SEARCH RECORDS ===== */
+var SRECS = [
+  {id:1,type:'discharge',dis:'cyst',date:'2022-12-24',doc:'Dr. P. Rajkumar (Surgical Oncology)',title:'Discharge Summary — Sebaceous Cyst Scalp Excision',body:'Admission 24 Dec 2022. Same-day excision biopsy under general anaesthesia. Sebaceous cyst scalp occipito-parietal region, 2x4 cm with punctum. IP No: 10201/2022. Drug allergy: NIL. Discharge the same day with wound care instructions.',pages:[1, 2, 3]},
+  {id:2,type:'lab',dis:'cyst',date:'2022-12-22',doc:'Dr. Kala K (Pathology)',title:'Pre-operative Lab Panel — Full Blood Count, LFT, Serology (Dec 2022)',body:'Haemoglobin 7.9 g/dL (low iron-deficiency anaemia). WBC 9630 /uL normal. Platelets 354k. PT/INR 14.1/1.0. Random glucose 166 mg/dL elevated. HbA1c 7.0%. LFT normal. TSH 2.68 mIU/L. HBsAg negative. Anti-HCV negative.',pages:[4, 5, 6, 7, 8, 9, 10]},
+  {id:3,type:'echo',dis:'cyst',date:'2022-12-22',doc:'Dr. T. Ashok Kumar (Cardiology)',title:'2D Echo Colour Doppler — Baseline Cardiac Assessment',body:'EF 70%. Normal LV systolic/diastolic. Trivial MR, TR, PR. No valvular disease. Aortic root normal.',pages:[11, 12]},
+  {id:4,type:'radiology',dis:'cyst',date:'2022-12-22',doc:'Dr. Madhumita C (Radiology)',title:'CT Brain Plain — Scalp Cyst Characterisation',body:'Right parietal scalp sebaceous cyst 4.1x4.1 cm with calcified foci. No intracranial extension. Cerebral parenchyma normal. No acute haemorrhage or infarct.',pages:[13, 14, 15, 16]},
+  {id:5,type:'ecg',dis:'cyst',date:'2022-12-22',doc:'KMH Cardiology',title:'12-Lead ECG — Pre-anaesthesia Baseline',body:'Sinus rhythm. HR 83 bpm. Normal QRS axis. P-R interval normal. No ST-segment changes. Cardiac fitness confirmed for general anaesthesia.',pages:[17]},
+  {id:6,type:'opd',dis:'cyst',date:'2022-12-31',doc:'Dr. P. Rajkumar (Surgical Oncology)',title:'Post-op OPD Review — Wound Healing Check',body:'Post-op day 7 review. Scalp wound clean and healing well. Sutures removed. Full recovery confirmed. Discharged from outpatient follow-up.',pages:[18, 19]},
+  {id:7,type:'echo',dis:'cancer',date:'2023-11-25',doc:'Sri Chakra Scans (Radiology)',title:'USG Left Breast and Axilla — First Detection Scan (Nov 2023)',body:'Solid hypervascular nodule 1.0 cm upper outer quadrant left breast. Irregular margins, hypoechoic. BIRADS 4B. Axillary lymph nodes mildly enlarged. Trucut biopsy recommended.',pages:[20, 21]},
+  {id:8,type:'hpe',dis:'cancer',date:'2023-12-12',doc:'Dr. Kala K (Pathology)',title:'Trucut Core Biopsy HPE — Invasive Breast Carcinoma Confirmed',body:'Invasive Breast Carcinoma of No Special Type (NST). Nottingham Grade 3. Tubule score 3, Nuclear pleomorphism 3, Mitosis 3. Total 9/9. High-grade malignancy confirmed.',pages:[23, 24]},
+  {id:9,type:'hpe',dis:'cancer',date:'2023-12-21',doc:'Dr. Kala K (Pathology)',title:'Immunohistochemistry (IHC) — Hormone Receptor and HER2 Profile',body:'ER Positive 90% (Allred 8/8). PR Positive 75%. HER2 3+ (Strongly Positive). Ki-67 40% (high proliferation). Triple-positive receptor profile confirmed.',pages:[25]},
+  {id:10,type:'radiology',dis:'cancer',date:'2023-12-18',doc:'KMH Nuclear Medicine',title:'PET-CT Whole Body — Oncology Staging Scan',body:'Primary left breast: FDG-avidity SUVmax 12.9, 1.8x1.4 cm. Axillary nodes reactive. No distant metastasis. Liver, lungs, bone marrow clear. Stage: pT1c N0 M0.',pages:[26, 27, 28, 29]},
+  {id:11,type:'lab',dis:'cancer',date:'2023-12-22',doc:'Dr. Kala K (Pathology)',title:'Pre-BCS Surgery Lab Panel — Full Pre-admission Screening',body:'Hb 11.2, WBC 8500, Platelets 280k. PT 13.2, INR 1.0, APTT 30s. LFT normal. Creatinine 0.8. Random glucose 122. TSH 3.1. HBsAg negative. HIV negative. B positive blood group.',pages:[30, 31, 32, 33, 34, 35, 36]},
+  {id:12,type:'echo',dis:'cancer',date:'2023-12-22',doc:'Dr. T. Ashok Kumar (Cardiology)',title:'2D Echo — Pre-BCS Cardiac Clearance',body:'EF 70%. New: Left ventricular hypertrophy (LVH). Global longitudinal strain GLPS -19% normal. No wall motion abnormality. Cleared for BCS surgery.',pages:[37, 38]},
+  {id:13,type:'ecg',dis:'cancer',date:'2023-12-22',doc:'KMH Cardiology',title:'12-Lead ECG — Pre-BCS Cardiac Fitness',body:'Sinus rhythm, HR 84 bpm. Normal QRS. No ST-T changes. Cleared for general anaesthesia.',pages:[39]},
+  {id:14,type:'opd',dis:'cancer',date:'2023-12-27',doc:'Dr. Joseph Dominic (Internal Medicine)',title:'OPD — Severe Anaemia Management Pre-surgery',body:'Ferritin 3.07 ng/mL (critically low). Hb 7.8 g/dL. Iron-deficiency anaemia. IV Iron Carboxymaltose 1000mg prescribed. Drug allergy: Ranitidine documented.',pages:[40]},
+  {id:15,type:'discharge',dis:'cancer',date:'2024-01-05',doc:'Dr. P. Rajkumar (Surgical Oncology)',title:'Discharge Summary — Left Breast Conserving Surgery + SLNB',body:'BCS with SLNB 04 Jan 2024. Blue dye technique. 5 sentinel nodes all negative. Surgical margins clear. Sent for histopathology. Home: Pantoprazole, Tamoxifen 20mg, Calcium + Vit D.',pages:[41, 42, 43, 44, 45]},
+  {id:16,type:'hpe',dis:'cancer',date:'2024-01-10',doc:'Dr. Kala K (Pathology)',title:'BCS Surgical Specimen HPE — Final Pathology Report',body:'Specimen 4.5x3.5x2 cm. Invasive Carcinoma NST 1.8cm Grade 3 with DCIS (comedo). No lymphovascular invasion. All margins clear (>10mm). 5 sentinel nodes 0/5 metastasis. pT1c pN0 M0.',pages:[46, 47]},
+  {id:17,type:'opd',dis:'cancer',date:'2024-01-11',doc:'Dr. P. Rajkumar (Surgical Oncology)',title:'OPD Follow-up — Post-op HPE Review and Chemo Planning',body:'Clear margins confirmed. Luminal B HER2+. Adjuvant chemo planned: AC-T regimen + Trastuzumab. BRCA1/2 genetic testing referral issued.',pages:[48]},
+  {id:18,type:'opd',dis:'cancer',date:'2024-03-06',doc:'Dr. P. Rajkumar (Surgical Oncology)',title:'OPD Review — Adjuvant Chemotherapy Cycle 2 Assessment',body:'Cycle 2 AC completed. Mild nausea, grade 1 alopecia. Wound healed. Axilla clear. Next cycle scheduled.',pages:[49]},
+  {id:19,type:'echo',dis:'gynae',date:'2025-02-07',doc:'Dr. Afrah / Dr. Suhara (Radiology)',title:'USG Abdomen and TVS Scan — Tamoxifen Monitoring',body:'Endometrial thickness 13.3mm (elevated). Uterus bulky. Three complex ovarian cysts bilaterally, largest 2.8cm. No solid components. Gynaecology review advised.',pages:[50, 51]},
+  {id:20,type:'opd',dis:'gynae',date:'2025-02-12',doc:'Dr. Devi C (Gynaecology)',title:'Gynaecology OPD — Endometrial Evaluation and Pipelle Biopsy',body:'Irregular menstrual bleeding. Pelvic examination done. Endometrial thickness 13.3mm on TVS. Pipelle endometrial sampling performed under local anaesthesia.',pages:[52]},
+  {id:21,type:'lab',dis:'gynae',date:'2025-02-12',doc:'Dr. Kala K (Pathology)',title:'Serum CA-125 Tumour Marker — Normal Result',body:'CA-125: 11.99 U/ml. Reference: <35 U/ml. Normal. No evidence of active ovarian malignancy. Routine monitoring for Tamoxifen-related changes.',pages:[53]},
+  {id:22,type:'hpe',dis:'gynae',date:'2025-02-14',doc:'Dr. Kala K and Dr. Sumitha G (Pathology)',title:'Pipelle Endometrial Sampling Histopathology',body:'Endometrial polyp with simple hyperplasia without atypia. No endometrial carcinoma. No complex hyperplasia. Benign endometrial polyp. Likely Tamoxifen-induced.',pages:[54]},
+  {id:23,type:'opd',dis:'gynae',date:'2025-05-09',doc:'Dr. P. Rajkumar (Surgical Oncology)',title:'OPD — GnRH Medical Ovarian Suppression Discussion',body:'Options discussed: monthly GnRH analogue injection (Zoladex/Leuprolide) vs laparoscopic bilateral oophorectomy. Patient prefers medical suppression. Referral issued.',pages:[55]},
+  {id:24,type:'discharge',dis:'gynae',date:'2026-06-15',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Discharge Summary — Day Care Inj. Triptorelin (June 2026)',body:'Admitted for day care depot Inj. Triptorelin 11.25mg IM (GnRH suppression) under Dr. Joseph Dominic. Discharged in stable condition.',pages:[111]},
+  {id:25,type:'echo',dis:'gynae',date:'2026-06-12',doc:'Dr. T. P. Ravi (Radiology)',title:'USG Neck & Thyroid — Multinodular Goiter TIRADS III',body:'Right lobe and isthmus enlarged with a well-defined nodule measuring 3.8x2.9 cm; left lobe nodule 1.6x0.9 cm. No cervical lymphadenopathy.',pages:[112, 113, 114]},
+  {id:26,type:'lab',dis:'gynae',date:'2026-06-12',doc:'Dr. Sharmila S (Biochemistry)',title:'Comprehensive Outpatient Lab Panel (June 2026)',body:'HbA1c 6.4%, Fasting Glucose 122.4, PPBS 198.6 (impaired glucose tolerance). Lipid Profile: Cholesterol 170, Triglycerides 233.89 (elevated), HDL 37.47 (low), LDL 85.75. TSH 2.15, Free T3/T4 normal.',pages:[115, 116, 117, 118]},
+  {id:27,type:'opd',dis:'gynae',date:'2026-06-15',doc:'Dr. Geethalakshmi S (Gynaecology)',title:'OPD Oncology/Endocrine Review — Thyroid Nodule Assessment',body:'Consultation for thyroid nodule / multinodular goiter follow-up. Vital signs stable, plan for clinical correlation.',pages:[119, 120]},
+  {id:28,type:'opd',dis:'gynae',date:'2026-03-15',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'OPD Oncology Review — Triptorelin Cycle 4 Depot Assessment',body:'Clinical review and prescription for depot Inj. Triptorelin 11.25mg. Blood pressure 120/80 mmHg, pain score 0/10.',pages:[121, 122]},
+  {id:29,type:'chemo',dis:'gynae',date:'2026-03-15',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Inj. Triptorelin Depot Cycle 4',body:'Weight 61.1 kg, BSA 1.65. Adjuvant Triptorelin 11.25mg IM administered. Vital parameters stable.',pages:[123, 124]},
+  {id:30,type:'opd',dis:'gynae',date:'2025-12-15',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'OPD Oncology Review — Triptorelin Cycle 3 Depot Planning',body:'Follow-up assessment and planning for 3rd dose of Triptorelin. Vital signs monitored, prescriptions ongoing.',pages:[125, 126]},
+  {id:31,type:'chemo',dis:'gynae',date:'2025-12-15',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Inj. Triptorelin Depot Cycle 3',body:'Weight 69.8 kg, BSA 1.65. Adjuvant Triptorelin 11.25mg IM administered.',pages:[127, 128]},
+  {id:32,type:'chemo',dis:'gynae',date:'2025-09-15',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Inj. Triptorelin Depot Cycle 2',body:'Weight 69.0 kg, BSA 1.66. Adjuvant Triptorelin 11.25mg IM administered.',pages:[129, 130]},
+  {id:33,type:'opd',dis:'gynae',date:'2025-10-08',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'OPD Oncology Review — Triptorelin Follow-up & Thyroid Check',body:'Review for amenorrhea and thyroid nodule. Triptorelin ongoing, vital parameters stable.',pages:[131, 132]},
+  {id:34,type:'opd',dis:'gynae',date:'2025-02-22',doc:'Dr. Geethalakshmi S (Gynaecology)',title:'OPD Gynaecology/Oncology Review — Thyroid Goiter Assessment',body:'Outpatient assessment form by Dr. Geethalakshmi S. Nodule 3.8x2.9 cm noted in right lobe. Plan for clinical correlation.',pages:[133, 134]},
+  {id:35,type:'chemo',dis:'gynae',date:'2025-06-15',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Inj. Triptorelin Depot Cycle 1',body:'Weight 69.0 kg, BSA 1.65. Adjuvant Triptorelin 11.25mg IM administered. First dose of medical suppression.',pages:[135, 136]},
+  {id:36,type:'opd',dis:'gynae',date:'2025-06-15',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'OPD Oncology Review — Triptorelin Cycle 1 Initiation',body:'Consultation regarding initiation of medical ovarian suppression. Discussion of side effects, Tamoxifen ongoing.',pages:[137, 138]},
+  {id:37,type:'chemo',dis:'gynae',date:'2025-06-15',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Inj. Triptorelin Depot Cycle 1 (Admin Log)',body:'Weight 68.2 kg, BSA 1.66. Depot Triptorelin 11.25mg intramuscular injection given.',pages:[139, 140]},
+  {id:38,type:'opd',dis:'cancer',date:'2025-02-07',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'OPD Oncology Review — Simple Breast Cyst Assessment',body:'Post-operative changes, simple cyst in breast. Discussion of mammography results, Tamoxifen ongoing.',pages:[141, 142]},
+  {id:39,type:'echo',dis:'cancer',date:'2025-02-07',doc:'Dr. Priya N (Radiology)',title:'3D Digital Mammography with Tomosynthesis & USG Correlation',body:'Bilateral screening shows heterogeneously dense breast (Category C). Rim calcifications, left simple cysts, post-op changes. No signs of recurrence.',pages:[143, 144]},
+  {id:40,type:'lab',dis:'cancer',date:'2025-01-16',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'MedGenome Hereditary Cancer Gene Panel — BRCA Negative',body:'Comprehensive 158-gene cancer panel by NGS & MLPA. No pathogenic variants detected. BRCA1 and BRCA2 negative status confirmed.',pages:[145, 146, 147, 148, 149, 150, 151, 152]},
+  {id:41,type:'chemo',dis:'cancer',date:'2025-01-14',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Adjuvant Trastuzumab (Cycle 17)',body:'Weight 69.1 kg, BSA 1.65. Adjuvant Trastuzumab administered under medical oncology.',pages:[153, 154]},
+  {id:42,type:'opd',dis:'cancer',date:'2025-01-14',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'OPD Oncology Prescription — Tamoxifen & Supportive Care',body:'Prescription for Tamoxifen 20mg, Calten-D, Dulcolax, Metosartan 40mg. Review after 1 month.',pages:[155]},
+  {id:43,type:'echo',dis:'cancer',date:'2024-12-26',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'2D Echo Colour Doppler — Herceptin Cardiac Surveillance',body:'EF 74%. Normal chamber dimensions, structurally normal valves, Grade I diastolic dysfunction. No clot or pericardial effusion.',pages:[156, 157, 158]},
+  {id:44,type:'opd',dis:'cancer',date:'2024-12-05',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'OPD Oncology Prescription — Tamoxifen and Metosartan',body:'Routine prescription for Tamoxifen 20mg, Calten-D, Dulcolax, Metosartan 40mg.',pages:[159, 160]},
+  {id:45,type:'chemo',dis:'cancer',date:'2024-12-24',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Adjuvant Trastuzumab (Cycle 16)',body:'Weight 69.6 kg, BSA 1.65. Adjuvant Trastuzumab administered. Normal vital parameters.',pages:[161, 162]},
+  {id:46,type:'lab',dis:'cancer',date:'2024-12-05',doc:'Dr. Geethalakshmi S (Gynaecology)',title:'Comprehensive Outpatient Lab Panel (Dec 2024)',body:'HbA1c 6.5%, FBS 118.4, PPBS 224.2. Free TFT: TSH 1.23, Free T3/T4 normal.',pages:[163, 164, 165]},
+  {id:47,type:'opd',dis:'cancer',date:'2024-11-16',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'OPD Oncology Review — Trastuzumab Cycle 14 Follow-up',body:'Assessment post-Cycle 14. Vital parameters normal, plan for Cycle 15 Trastuzumab daycare.',pages:[166, 167]},
+  {id:48,type:'chemo',dis:'cancer',date:'2024-12-03',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Adjuvant Trastuzumab (Cycle 15)',body:'Weight 69.8 kg, BSA 1.65. Adjuvant Trastuzumab administered.',pages:[168, 169]},
+  {id:49,type:'chemo',dis:'cancer',date:'2024-11-12',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Adjuvant Trastuzumab (Cycle 14)',body:'Weight 70.3 kg, BSA 1.65. Adjuvant Trastuzumab administered.',pages:[171, 172]},
+  {id:50,type:'chemo',dis:'cancer',date:'2024-10-22',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Adjuvant Trastuzumab (Cycle 13)',body:'Weight 73.6 kg, BSA 1.65. Adjuvant Trastuzumab administered.',pages:[174, 175]},
+  {id:51,type:'lab',dis:'cancer',date:'2024-10-05',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Outpatient Lab Report — Haemoglobin Screening',body:'Haemoglobin 10.1 g/dL (low, mild persistent anaemia). WBC 9630/uL normal. Platelets 354k normal.',pages:[176]},
+  {id:52,type:'echo',dis:'cancer',date:'2024-09-26',doc:'Dr. Srinivasan V (Cardiology)',title:'2D Echo Colour Doppler — LVEF 62% Cardiac Check',body:'EF 62%. Normal chamber dimensions, structurally and functionally normal valves. Normal LV systolic function.',pages:[177, 178, 179]},
+  {id:53,type:'echo',dis:'cancer',date:'2024-09-26',doc:'Dr. Sujeeth S (Radiology)',title:'USG Abdomen and TVS Scan — Fatty Liver & Ovarian Cysts',body:'Grade I Fatty Liver, Polycystic Ovaries, thickened endometrium (13.3mm) and complex ovarian cysts. TVS screening.',pages:[180, 181, 182, 183]},
+  {id:54,type:'opd',dis:'cancer',date:'2024-09-26',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'OPD Oncology Prescription — Tamoxifen & Dulcolax',body:'Routine prescription for Tamoxifen 20mg, Calten-D, Dulcolax, Metosartan 40mg.',pages:[184]},
+  {id:55,type:'chemo',dis:'cancer',date:'2024-09-14',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Adjuvant Trastuzumab (Cycle 12)',body:'Weight 71.3 kg, BSA 1.65. Adjuvant Trastuzumab administered.',pages:[185, 186]},
+  {id:56,type:'chemo',dis:'cancer',date:'2024-09-10',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Adjuvant Trastuzumab (Cycle 11)',body:'Weight 71.3 kg, BSA 1.65. Adjuvant Trastuzumab administered.',pages:[188, 189]},
+  {id:57,type:'chemo',dis:'cancer',date:'2024-08-20',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Adjuvant Trastuzumab (Cycle 10)',body:'Weight 71.6 kg, BSA 1.65. Adjuvant Trastuzumab administered.',pages:[191, 192]},
+  {id:58,type:'lab',dis:'cancer',date:'2024-08-02',doc:'Dr. Geethalakshmi S (Gynaecology)',title:'Comprehensive Outpatient Lab Panel (Aug 2024)',body:'HbA1c 7.1%, eAG 157 (elevated). FBS 112.7, PPBS 213.9. Free TFT: TSH 0.77, Free T3/T4 normal.',pages:[193, 194, 195]},
+  {id:59,type:'hpe',dis:'gynae',date:'2024-08-02',doc:'Dr. Madhumita C (Radiology)',title:'USG Guided FNAC Left Thyroid Nodule',body:'Fine needle aspiration biopsy of left thyroid nodule (10 slides cytopathology). Suggestive of colloid nodule / colloid goiter.',pages:[196, 197]},
+  {id:60,type:'echo',dis:'cancer',date:'2024-07-30',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'2D Echo Colour Doppler — Cardiac Check post-RT',body:'EF 65%. Normal chamber dimensions, normal LV systolic and diastolic function, no wall motion abnormalities.',pages:[198, 199, 200, 201]},
+  {id:61,type:'chemo',dis:'cancer',date:'2024-07-30',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'Day Care Chart — Adjuvant Trastuzumab (Cycle 9)',body:'Weight 71.3 kg, BSA 1.65. Adjuvant Trastuzumab maintenance initiated post-RT.',pages:[203, 204]},
+  {id:62,type:'opd',dis:'cancer',date:'2024-07-30',doc:'Dr. Joseph Dominic (Medical Oncology)',title:'OPD Oncology Review — Initiation of Trastuzumab Maintenance',body:'Initial clinical assessment for post-RT Trastuzumab. Planning for 3-weekly maintenance schedule.',pages:[205, 206]},
+  {id:63,type:'discharge',dis:'cancer',date:'2024-07-10',doc:'Dr. V. Srinivasan (Radiation Oncology)',title:'Radiation Oncology Discharge Summary — Adjuvant Radiotherapy',body:'IMRT + ABC radiotherapy course (11 June to 10 July 2024). Delivered 40Gy to PTV in 15 fractions to left breast & SCL + 10Gy in 5 fractions boost to scar. Elekta Infinity accelerator. Stable discharge.',pages:[207, 208, 209, 210]}];
+
+var dFilter = {cyst:true, cancer:true, gynae:true};
+
+function toggleD(dis) {
+  dFilter[dis] = !dFilter[dis];
+  var btn = document.getElementById('db-' + dis);
+  if (btn) btn.className = 'db' + (dFilter[dis] ? ' on-' + dis : '');
+  runSearch();
 }
 
-// Wire up tab anchors
-document.getElementById("tab-btn-history").onclick = function(){ return switchTab("history"); };
-document.getElementById("tab-btn-comparison").onclick = function(){ return switchTab("comparison"); };
-document.getElementById("sort-btn").onclick = function(){ return toggleSort(); };
-document.querySelector(".add-files-bar").onclick = function(){ document.getElementById("file-input").click(); };
+function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 
-renderFiltered();
+function runSearch() {
+  var q = (document.getElementById('s-q').value || '').toLowerCase();
+  var type = document.getElementById('s-type').value;
+  var doc = document.getElementById('s-doc').value;
+  var srt = document.getElementById('s-sort').value;
+  var res = document.getElementById('s-res');
+  var stat = document.getElementById('s-stat');
+
+  var results = SRECS.filter(function(r) {
+    if (!dFilter[r.dis]) return false;
+    if (type && r.type !== type) return false;
+    if (doc && r.doc.indexOf(doc) < 0) return false;
+    if (q) {
+      var txt = (r.title + ' ' + r.body + ' ' + r.doc).toLowerCase();
+      if (txt.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+
+  results.sort(function(a,b) {
+    return srt === 'asc' ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
+  });
+
+  stat.textContent = 'Found ' + results.length + ' matching records';
+  if (results.length === 0) {
+    res.innerHTML = '<div class="empty">No results. Adjust your filters or search term.</div>';
+    return;
+  }
+
+  var re = q ? new RegExp('(' + escRe(q) + ')','gi') : null;
+  var dNames = {cyst:'Sebaceous Cyst',cancer:'Breast Cancer',gynae:'Gynae Follow-up'};
+  var dColors = {cyst:'var(--cy)',cancer:'var(--ca)',gynae:'var(--gy)'};
+  var h = '';
+
+  for (var i = 0; i < results.length; i++) {
+    var r = results[i];
+    var dT = re ? r.title.replace(re,'<span class="hl">$1</span>') : r.title;
+    var dB = re ? r.body.replace(re,'<span class="hl">$1</span>') : r.body;
+    var btns = r.pages.map(function(p) {
+      return '<button class="jp" onclick="jumpToPage(' + p + ')">Jump to Pg ' + p + '</button>';
+    }).join(' ');
+
+    h += '<div class="rc">' +
+      '<div class="rc-top">' +
+      '<div class="rc-info"><h3>' + dT + '</h3>' +
+      '<div class="rc-meta"><span>&#128197; ' + r.date + '</span><span>&#128104;&#8205;&#9877;&#65039; ' + r.doc + '</span>' +
+      '<span><span class="dd" style="background:' + dColors[r.dis] + '"></span>' + dNames[r.dis] + '</span></div></div>' +
+      '<div style="display:flex;gap:5px;flex-wrap:wrap">' + btns + '</div>' +
+      '</div>' +
+      '<div class="rc-body">' + dB + '</div>' +
+      '</div>';
+  }
+  res.innerHTML = h;
+}
+
+function jumpToPage(n) {
+  showTab('browser');
+  goPage(n);
+}
+
+/* ===== LAB DATA ===== */
+var LAB_ROWS = [
+
+  /* ══════════════ 22 DEC 2022 — Pre-op Workup (LabNo: 1385172, Ref: Dr. Rajkumar P) ══════════════ */
+  {cat:'Haematology', name:'Total WBC Count',              result:'9,630',               unit:'/uL',      ref:'4000–10000',            status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Haematology', name:'Neutrophils',                  result:'65.5',                unit:'%',        ref:'40–80',                 status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Haematology', name:'Lymphocytes',                  result:'28.0',                unit:'%',        ref:'20–40',                 status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Haematology', name:'Eosinophils',                  result:'2.8',                 unit:'%',        ref:'1–6',                   status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Haematology', name:'Monocytes',                    result:'3.2',                 unit:'%',        ref:'2–10',                  status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Haematology', name:'Basophils',                    result:'0.5',                 unit:'%',        ref:'0–1',                   status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Haematology', name:'Haemoglobin',                  result:'7.9',                 unit:'g/dL',     ref:'12–15',                 status:'low',    label:'▼ LOW',            date:'22 Dec 2022'},
+  {cat:'Haematology', name:'PCV (Haematocrit)',            result:'28.4',                unit:'%',        ref:'36–46',                 status:'low',    label:'▼ LOW',            date:'22 Dec 2022'},
+  {cat:'Haematology', name:'RBC Count',                    result:'4.51',                unit:'×10⁶/µL',  ref:'3.8–4.8',               status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Haematology', name:'Platelet Count',               result:'3,27,000',            unit:'/µL',      ref:'1,50,000–4,10,000',     status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Haematology', name:'MCV',                          result:'63.0',                unit:'fL',       ref:'83–101',                status:'low',    label:'▼ LOW',            date:'22 Dec 2022'},
+  {cat:'Haematology', name:'MCH',                          result:'17.5',                unit:'pg',       ref:'27–32',                 status:'low',    label:'▼ LOW',            date:'22 Dec 2022'},
+  {cat:'Haematology', name:'MCHC',                         result:'27.8',                unit:'%',        ref:'31.5–34.5',             status:'low',    label:'▼ LOW',            date:'22 Dec 2022'},
+  {cat:'Haematology', name:'RDW',                          result:'19.4',                unit:'%',        ref:'11.6–14.0',             status:'high',   label:'▲ HIGH',           date:'22 Dec 2022'},
+  {cat:'Coagulation', name:'PT Test',                      result:'13.0',                unit:'secs',     ref:'8.87–13.15',            status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Coagulation', name:'INR',                          result:'1.19',                unit:'—',        ref:'0.79–1.20',             status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Coagulation', name:'APTT Test',                    result:'28.4',                unit:'secs',     ref:'24.8–40.2',             status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Biochemistry', name:'HbA1C',                       result:'6.4',                 unit:'%',        ref:'4–6 Normal / 6–7 Good', status:'high',   label:'Good Control',     date:'22 Dec 2022'},
+  {cat:'Biochemistry', name:'Glucose (Random)',             result:'166',                 unit:'mg/dL',    ref:'<140',                  status:'high',   label:'▲ HIGH',           date:'22 Dec 2022'},
+  {cat:'Biochemistry', name:'eAG (Estimated Avg Glucose)', result:'137',                 unit:'mg/dL',    ref:'—',                     status:'high',   label:'Elevated',         date:'22 Dec 2022'},
+  {cat:'Biochemistry', name:'Urea',                        result:'25',                  unit:'mg/dL',    ref:'16.6–48.5',             status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Biochemistry', name:'Creatinine',                  result:'0.7',                 unit:'mg/dL',    ref:'0.51–0.95',             status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Biochemistry', name:'Bicarbonate',                 result:'27.8',                unit:'mmol/L',   ref:'21–28',                 status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Liver Function', name:'GGT',                       result:'24.9',                unit:'U/L',      ref:'6–42',                  status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Liver Function', name:'Total Bilirubin',           result:'0.2',                 unit:'mg/dL',    ref:'<1.2',                  status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Liver Function', name:'Direct Bilirubin',          result:'0.1',                 unit:'mg/dL',    ref:'<0.3',                  status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Liver Function', name:'Indirect Bilirubin',        result:'0.1',                 unit:'mg/dL',    ref:'0.1–1.0',               status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Liver Function', name:'SGOT / AST',                result:'10',                  unit:'IU/L',     ref:'10–35',                 status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Liver Function', name:'SGPT / ALT',                result:'13',                  unit:'IU/L',     ref:'10–35',                 status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Liver Function', name:'Alkaline Phosphatase',      result:'84',                  unit:'U/L',      ref:'35–105',                status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Liver Function', name:'Total Protein',             result:'7.3',                 unit:'g/dL',     ref:'6.4–8.3',               status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Liver Function', name:'Albumin',                   result:'4.4',                 unit:'g/dL',     ref:'3.5–5.2',               status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Liver Function', name:'Globulins',                 result:'2.9',                 unit:'g/dL',     ref:'2.5–3.3',               status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Liver Function', name:'A/G Ratio',                 result:'1.5',                 unit:'—',        ref:'1.1–1.5',               status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Electrolytes', name:'Sodium',                      result:'143',                 unit:'mmol/L',   ref:'136–145',               status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Electrolytes', name:'Potassium',                   result:'4.3',                 unit:'mmol/L',   ref:'3.5–5.1',               status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Electrolytes', name:'Chloride',                    result:'103',                 unit:'mmol/L',   ref:'98–107',                status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Thyroid & Serology', name:'TSH',                   result:'0.816',               unit:'µIU/mL',   ref:'0.27–4.2',              status:'normal', label:'Normal',           date:'22 Dec 2022'},
+  {cat:'Thyroid & Serology', name:'HIV',                   result:'Non Reactive (0.48)', unit:'S/CO',     ref:'<1.00',                 status:'normal', label:'Non-Reactive',     date:'22 Dec 2022'},
+  {cat:'Thyroid & Serology', name:'HCV',                   result:'Non Reactive (0.10)', unit:'S/CO',     ref:'<1.00',                 status:'normal', label:'Non-Reactive',     date:'22 Dec 2022'},
+  {cat:'Thyroid & Serology', name:'HBsAg',                 result:'Non Reactive (0.22)', unit:'S/CO',     ref:'<1.00',                 status:'normal', label:'Non-Reactive',     date:'22 Dec 2022'},
+  {cat:'Thyroid & Serology', name:'Syphilis Ab',           result:'Non Reactive (0.08)', unit:'S/CO',     ref:'<1.00',                 status:'normal', label:'Non-Reactive',     date:'22 Dec 2022'},
+
+  /* ══════════════ 22 DEC 2023 — Pre-BCS Workup (LabNo: 1553818, Ref: Dr. Rajkumar P) ══════════════ */
+  {cat:'Haematology', name:'Total WBC Count',              result:'9,860',               unit:'/uL',      ref:'4000–10000',            status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Haematology', name:'Neutrophils',                  result:'63.3',                unit:'%',        ref:'40–80',                 status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Haematology', name:'Lymphocytes',                  result:'29.2',                unit:'%',        ref:'20–40',                 status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Haematology', name:'Eosinophils',                  result:'2.9',                 unit:'%',        ref:'1–6',                   status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Haematology', name:'Monocytes',                    result:'4.0',                 unit:'%',        ref:'2–10',                  status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Haematology', name:'Basophils',                    result:'0.6',                 unit:'%',        ref:'1–2',                   status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Haematology', name:'Haemoglobin',                  result:'7.8',                 unit:'g/dL',     ref:'12–15',                 status:'low',    label:'▼ LOW',            date:'22 Dec 2023'},
+  {cat:'Haematology', name:'PCV (Haematocrit)',            result:'27.5',                unit:'%',        ref:'36–46',                 status:'low',    label:'▼ LOW',            date:'22 Dec 2023'},
+  {cat:'Haematology', name:'RBC Count',                    result:'4.64',                unit:'×10⁶/µL',  ref:'3.8–4.8',               status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Haematology', name:'Platelet Count',               result:'3,15,000',            unit:'/µL',      ref:'1,50,000–4,10,000',     status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Haematology', name:'MCV',                          result:'59.4',                unit:'fL',       ref:'83–101',                status:'low',    label:'▼ LOW',            date:'22 Dec 2023'},
+  {cat:'Haematology', name:'MCH',                          result:'16.7',                unit:'pg',       ref:'27–32',                 status:'low',    label:'▼ LOW',            date:'22 Dec 2023'},
+  {cat:'Haematology', name:'MCHC',                         result:'28.2',                unit:'%',        ref:'31.5–34.5',             status:'low',    label:'▼ LOW',            date:'22 Dec 2023'},
+  {cat:'Haematology', name:'RDW',                          result:'19.6',                unit:'%',        ref:'11.6–14.0',             status:'high',   label:'▲ HIGH',           date:'22 Dec 2023'},
+  {cat:'Biochemistry', name:'HbA1C',                       result:'5.9',                 unit:'%',        ref:'4–6 Normal / 6–7 Good', status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Biochemistry', name:'Glucose (Random)',             result:'100',                 unit:'mg/dL',    ref:'<140',                  status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Biochemistry', name:'eAG (Estimated Avg Glucose)', result:'123',                 unit:'mg/dL',    ref:'—',                     status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Biochemistry', name:'Urea',                        result:'27',                  unit:'mg/dL',    ref:'16.6–48.5',             status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Biochemistry', name:'Creatinine',                  result:'0.7',                 unit:'mg/dL',    ref:'0.51–0.95',             status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Biochemistry', name:'Bicarbonate',                 result:'26.9',                unit:'mmol/L',   ref:'21–28',                 status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Liver Function', name:'GGT',                       result:'20.8',                unit:'U/L',      ref:'6–42',                  status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Liver Function', name:'Total Bilirubin',           result:'0.2',                 unit:'mg/dL',    ref:'0.14–1.2',              status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Liver Function', name:'Direct Bilirubin',          result:'0.1',                 unit:'mg/dL',    ref:'0.1–0.3',               status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Liver Function', name:'Indirect Bilirubin',        result:'0.1',                 unit:'mg/dL',    ref:'0.1–1.0',               status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Liver Function', name:'SGOT / AST',                result:'11',                  unit:'IU/L',     ref:'10–35',                 status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Liver Function', name:'SGPT / ALT',                result:'14',                  unit:'IU/L',     ref:'10–35',                 status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Liver Function', name:'Alkaline Phosphatase',      result:'81',                  unit:'U/L',      ref:'35–105',                status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Liver Function', name:'Total Protein',             result:'7.5',                 unit:'g/dL',     ref:'6.4–8.3',               status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Liver Function', name:'Albumin',                   result:'4.6',                 unit:'g/dL',     ref:'3.5–5.2',               status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Liver Function', name:'Globulins',                 result:'2.9',                 unit:'g/dL',     ref:'2.5–3.3',               status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Liver Function', name:'A/G Ratio',                 result:'1.6',                 unit:'—',        ref:'1.1–1.5',               status:'high',   label:'▲ Borderline',     date:'22 Dec 2023'},
+  {cat:'Electrolytes', name:'Sodium',                      result:'140',                 unit:'mmol/L',   ref:'135–145',               status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Electrolytes', name:'Potassium',                   result:'4.3',                 unit:'mmol/L',   ref:'3.5–5.1',               status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Electrolytes', name:'Chloride',                    result:'98',                  unit:'mmol/L',   ref:'98–106',                status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Thyroid & Serology', name:'TSH',                   result:'1.11',                unit:'µIU/mL',   ref:'0.27–4.2',              status:'normal', label:'Normal',           date:'22 Dec 2023'},
+  {cat:'Thyroid & Serology', name:'HIV',                   result:'Non Reactive (0.17)', unit:'S/CO',     ref:'<1.00',                 status:'normal', label:'Non-Reactive',     date:'22 Dec 2023'},
+  {cat:'Thyroid & Serology', name:'HCV',                   result:'Non Reactive (0.12)', unit:'S/CO',     ref:'<1.00',                 status:'normal', label:'Non-Reactive',     date:'22 Dec 2023'},
+  {cat:'Thyroid & Serology', name:'HBsAg',                 result:'Non Reactive (0.21)', unit:'S/CO',     ref:'<1.00',                 status:'normal', label:'Non-Reactive',     date:'22 Dec 2023'},
+  {cat:'Thyroid & Serology', name:'Syphilis Ab',           result:'Non Reactive (0.09)', unit:'S/CO',     ref:'<1.00',                 status:'normal', label:'Non-Reactive',     date:'22 Dec 2023'},
+
+  /* ══════════════ 23 DEC 2023 — Ferritin, Reticulocyte, LDH, Peripheral Smear (LabNo: 1554329) ══════════════ */
+  {cat:'Haematology', name:'Reticulocyte Count',           result:'3.2',                 unit:'%',        ref:'0.5–2.0 (Adult)',       status:'high',   label:'▲ HIGH',           date:'23 Dec 2023'},
+  {cat:'Haematology', name:'Direct Coombs Test (DCT)',     result:'Negative',            unit:'—',        ref:'Negative',              status:'normal', label:'Negative',         date:'23 Dec 2023'},
+  {cat:'Biochemistry', name:'Ferritin',                    result:'3.07',                unit:'ng/mL',    ref:'10–120',                status:'low',    label:'▼ LOW (Iron Def)', date:'23 Dec 2023'},
+  {cat:'Biochemistry', name:'Lactate Dehydrogenase (LDH)', result:'121.1',              unit:'U/L',      ref:'207–414',               status:'low',    label:'▼ LOW',            date:'23 Dec 2023'},
+
+  /* ══════════════ 27 DEC 2023 — Urine RE (LabNo: 1555756, Ref: Dr. Joseph Dominic) ══════════════ */
+  {cat:'Urine RE', name:'Blood (Erythrocytes/Hb)',         result:'Negative',            unit:'—',        ref:'Negative',              status:'normal', label:'Negative',         date:'27 Dec 2023'},
+  {cat:'Urine RE', name:'Bilirubin (Urine)',               result:'Negative',            unit:'—',        ref:'Negative',              status:'normal', label:'Negative',         date:'27 Dec 2023'},
+  {cat:'Urine RE', name:'Urobilinogen (Urine)',            result:'Normal',              unit:'—',        ref:'Normal',                status:'normal', label:'Normal',           date:'27 Dec 2023'},
+  {cat:'Urine RE', name:'Nitrite (Urine)',                 result:'Negative',            unit:'—',        ref:'Negative',              status:'normal', label:'Negative',         date:'27 Dec 2023'},
+  {cat:'Urine RE', name:'Pus Cells',                       result:'2–3',                 unit:'/HPF',     ref:'2–3',                   status:'normal', label:'Normal',           date:'27 Dec 2023'},
+  {cat:'Urine RE', name:'Epithelial Cells (Urine)',        result:'2–3',                 unit:'/HPF',     ref:'2–5',                   status:'normal', label:'Normal',           date:'27 Dec 2023'},
+  {cat:'Urine RE', name:'RBC (Urine)',                     result:'Absent',              unit:'/HPF',     ref:'Absent',                status:'normal', label:'Absent',           date:'27 Dec 2023'},
+  {cat:'Urine RE', name:'Casts (Urine)',                   result:'Absent',              unit:'—',        ref:'Absent',                status:'normal', label:'Absent',           date:'27 Dec 2023'},
+  {cat:'Urine RE', name:'Crystals (Urine)',                result:'Absent',              unit:'—',        ref:'Absent',                status:'normal', label:'Absent',           date:'27 Dec 2023'},
+  {cat:'Urine RE', name:'Trichomonas Vaginalis',           result:'Absent',              unit:'—',        ref:'Absent',                status:'normal', label:'Absent',           date:'27 Dec 2023'},
+  {cat:'Urine RE', name:'Bacteria (Urine)',                result:'Absent',              unit:'—',        ref:'Absent',                status:'normal', label:'Absent',           date:'27 Dec 2023'},
+  {cat:'Urine RE', name:'Yeast Cells (Urine)',             result:'Absent',              unit:'—',        ref:'Absent',                status:'normal', label:'Absent',           date:'27 Dec 2023'},
+
+  /* ══════════════ 02 AUG 2024 — TFT / Glucose Workup (LabNo: 1655314 / 4080300017) ══════════════ */
+  {cat:'Biochemistry', name:'HbA1C',                       result:'7.1',                 unit:'%',        ref:'4–6 Normal / 6–7 Good', status:'high',   label:'▲ HIGH (Fair)',    date:'02 Aug 2024'},
+  {cat:'Biochemistry', name:'eAG (Estimated Avg Glucose)', result:'157',                 unit:'mg/dL',    ref:'—',                     status:'high',   label:'Elevated',         date:'02 Aug 2024'},
+  {cat:'Biochemistry', name:'Glucose (Fasting)',           result:'112.7',               unit:'mg/dL',    ref:'<100',                  status:'high',   label:'▲ HIGH',           date:'02 Aug 2024'},
+  {cat:'Biochemistry', name:'Glucose (Postprandial)',      result:'213.9',               unit:'mg/dL',    ref:'<140',                  status:'high',   label:'▲ HIGH (Diabetic)',date:'02 Aug 2024'},
+  {cat:'Thyroid & Serology', name:'TSH',                   result:'0.77',                unit:'µIU/mL',   ref:'0.3–4.5',               status:'normal', label:'Normal',           date:'02 Aug 2024'},
+  {cat:'Thyroid & Serology', name:'Free T3',               result:'2.71',                unit:'pg/mL',    ref:'1.58–4.2',              status:'normal', label:'Normal',           date:'02 Aug 2024'},
+  {cat:'Thyroid & Serology', name:'Free T4',               result:'1.09',                unit:'ng/dL',    ref:'0.8–2.7',               status:'normal', label:'Normal',           date:'02 Aug 2024'},
+
+  /* ══════════════ 05 OCT 2024 — Haemoglobin Screening (LabNo: 1689221) ══════════════ */
+  {cat:'Haematology', name:'Haemoglobin',                  result:'10.1',                unit:'g/dL',     ref:'12–15',                 status:'low',    label:'▼ LOW',            date:'05 Oct 2024'},
+
+  /* ══════════════ 05 DEC 2024 — TFT / Glycemic Check (LabNo: 4120300168) ══════════════ */
+  {cat:'Biochemistry', name:'HbA1C',                       result:'6.5',                 unit:'%',        ref:'4–6 Normal / 6–7 Good', status:'high',   label:'▲ HIGH (Pre-diab)', date:'05 Dec 2024'},
+  {cat:'Biochemistry', name:'eAG (Estimated Avg Glucose)', result:'139.85',              unit:'mg/dL',    ref:'—',                     status:'high',   label:'Elevated',         date:'05 Dec 2024'},
+  {cat:'Biochemistry', name:'Glucose (Fasting)',           result:'118.4',               unit:'mg/dL',    ref:'<100',                  status:'high',   label:'▲ HIGH',           date:'05 Dec 2024'},
+  {cat:'Biochemistry', name:'Glucose (Postprandial)',      result:'224.2',               unit:'mg/dL',    ref:'<140',                  status:'high',   label:'▲ HIGH (Diabetic)',date:'05 Dec 2024'},
+  {cat:'Thyroid & Serology', name:'TSH',                   result:'1.23',                unit:'µIU/mL',   ref:'0.3–4.5',               status:'normal', label:'Normal',           date:'05 Dec 2024'},
+  {cat:'Thyroid & Serology', name:'Free T3',               result:'3.40',                unit:'pg/mL',    ref:'1.58–4.2',              status:'normal', label:'Normal',           date:'05 Dec 2024'},
+  {cat:'Thyroid & Serology', name:'Free T4',               result:'1.09',                unit:'ng/dL',    ref:'0.8–2.7',               status:'normal', label:'Normal',           date:'05 Dec 2024'},
+
+  /* ══════════════ 12 FEB 2025 — Cancer Marker (LabNo: 1754752) ══════════════ */
+  {cat:'Cancer Markers', name:'CA 125 (Ovarian Cancer Marker)', result:'11.99',         unit:'U/mL',     ref:'<35.00',                status:'normal', label:'Normal',           date:'12 Feb 2025'},
+
+  /* ══════════════ 12 JUN 2026 — Endocrine / Lipid Workup (LabNo: 6060300459) ══════════════ */
+  {cat:'Biochemistry', name:'HbA1C',                       result:'6.4',                 unit:'%',        ref:'4–6 Normal / 6–7 Good', status:'high',   label:'▲ HIGH (Pre-diab)', date:'12 Jun 2026'},
+  {cat:'Biochemistry', name:'eAG (Estimated Avg Glucose)', result:'136.98',              unit:'mg/dL',    ref:'—',                     status:'high',   label:'Elevated',         date:'12 Jun 2026'},
+  {cat:'Biochemistry', name:'Glucose (Fasting)',           result:'122.4',               unit:'mg/dL',    ref:'<100',                  status:'high',   label:'▲ HIGH',           date:'12 Jun 2026'},
+  {cat:'Biochemistry', name:'Glucose (Postprandial)',      result:'198.6',               unit:'mg/dL',    ref:'<140',                  status:'high',   label:'▲ HIGH (Impaired)',date:'12 Jun 2026'},
+  {cat:'Biochemistry', name:'Cholesterol (Total)',         result:'170',                 unit:'mg/dL',    ref:'<200',                  status:'normal', label:'Normal',           date:'12 Jun 2026'},
+  {cat:'Biochemistry', name:'Triglycerides',               result:'233.89',              unit:'mg/dL',    ref:'<150',                  status:'high',   label:'▲ HIGH',           date:'12 Jun 2026'},
+  {cat:'Biochemistry', name:'HDL Cholesterol',             result:'37.47',               unit:'mg/dL',    ref:'>50',                   status:'low',    label:'▼ LOW',            date:'12 Jun 2026'},
+  {cat:'Biochemistry', name:'LDL Cholesterol',             result:'85.75',               unit:'mg/dL',    ref:'<100',                  status:'normal', label:'Normal',           date:'12 Jun 2026'},
+  {cat:'Biochemistry', name:'VLDL Cholesterol',            result:'46.78',               unit:'mg/dL',    ref:'<30',                   status:'high',   label:'▲ HIGH',           date:'12 Jun 2026'},
+  {cat:'Biochemistry', name:'CHOL/HDL Ratio',              result:'4.54',                unit:'—',        ref:'<4.4',                  status:'high',   label:'▲ Borderline',     date:'12 Jun 2026'},
+  {cat:'Biochemistry', name:'LDL/HDL Ratio',              result:'2.29',                unit:'—',        ref:'<2.8',                  status:'normal', label:'Normal',           date:'12 Jun 2026'},
+  {cat:'Thyroid & Serology', name:'TSH',                   result:'2.15',                unit:'µIU/mL',   ref:'0.3–4.5',               status:'normal', label:'Normal',           date:'12 Jun 2026'},
+  {cat:'Thyroid & Serology', name:'Free T3',               result:'3.19',                unit:'pg/mL',    ref:'1.58–4.2',              status:'normal', label:'Normal',           date:'12 Jun 2026'},
+  {cat:'Thyroid & Serology', name:'Free T4',               result:'1.29',                unit:'ng/dL',    ref:'0.8–2.7',               status:'normal', label:'Normal',           date:'12 Jun 2026'}];
+
+var labMap = {};
+var DATE_COLS = ['22 Dec 2022','22 Dec 2023','23 Dec 2023','27 Dec 2023','02 Aug 2024','05 Oct 2024','05 Dec 2024','12 Feb 2025','12 Jun 2026'];
+
+function buildLabMap() {
+  for (var i = 0; i < LAB_ROWS.length; i++) {
+    var r = LAB_ROWS[i];
+    if (!labMap[r.name]) {
+      labMap[r.name] = {cat:r.cat, ref:r.ref, unit:r.unit, vals:{}};
+      for (var j = 0; j < DATE_COLS.length; j++) labMap[r.name].vals[DATE_COLS[j]] = null;
+    }
+    labMap[r.name].vals[r.date] = {result:r.result, status:r.status, label:r.label};
+  }
+}
+
+function renderLab() {
+  var q = (document.getElementById('lab-q').value || '').toLowerCase();
+  var pnl = document.getElementById('lab-pnl').value;
+  var tbody = document.getElementById('lab-tbody');
+  var cats = ['Haematology','Coagulation','Biochemistry','Liver Function','Electrolytes','Thyroid & Serology','Cancer Markers','Urine RE'];
+  var h = '';
+
+  for (var c = 0; c < cats.length; c++) {
+    var cat = cats[c];
+    if (pnl && cat !== pnl) continue;
+    var rows = Object.keys(labMap).filter(function(n) {
+      return labMap[n].cat === cat && (!q || n.toLowerCase().indexOf(q) >= 0);
+    }).sort();
+    if (rows.length === 0) continue;
+
+    h += '<tr class="grp"><td colspan="12">' + cat + ' Panel</td></tr>';
+    for (var r = 0; r < rows.length; r++) {
+      var name = rows[r];
+      var m = labMap[name];
+      h += '<tr><td class="tn">' + name + '</td><td class="rf">' + m.ref + '</td><td class="rf">' + m.unit + '</td>';
+      for (var d = 0; d < DATE_COLS.length; d++) {
+        var v = m.vals[DATE_COLS[d]];
+        if (v) {
+          var cls = v.status === 'high' ? 'hi' : v.status === 'low' ? 'lo' : 'nm';
+          h += '<td class="vl ' + cls + '">' + v.result;
+          if (v.status !== 'normal') h += '<span class="vf">' + v.label + '</span>';
+          h += '</td>';
+        } else {
+          h += '<td class="vl em">&#8212;</td>';
+        }
+      }
+      h += '</tr>';
+    }
+  }
+  tbody.innerHTML = h || '<tr><td colspan="12" class="empty">No matching parameters.</td></tr>';
+}
+
+/* ===== TIMELINE DATA ===== */
+var TL_ITEMS = [
+
+  {date:'2022-12-22', month:'2022-12', dotColor:'#dc2626', label:'Dec 2022 — Pre-op Workup',
+   title:'CT Brain Plain, 2D Echo, ECG, Full Lab Panel (CBC, LFT, HbA1C, Electrolytes, Serology)',
+   desc:'Pre-operative assessment. Sebaceous cyst scalp confirmed on CT (4.1×4.1 cm right parietal). Echo EF 70%, Normal ECG (Sinus Rhythm, HR 83). CBC showed Iron-Deficiency Anaemia (Hb 7.9 g/dL, MCV 63, MCH 17.5). Random Glucose 166 (HbA1C 6.4% — Good control). All serology non-reactive.'},
+  {date:'2022-12-24', month:'2022-12', dotColor:'#6366f1', label:'24 Dec 2022 — Surgery #1',
+   title:'Excision Biopsy — Sebaceous Cyst Scalp (Under GA)',
+   desc:'Admission, Surgery and Discharge on the same day. Surgeons: Dr. P. Rajkumar, Dr. Kathiresan, Dr. Vidya. Occipito-parietal scalp cyst 2×4 cm with punctum. Wound closed in layers. IP.NO: 10201/2022. Discharged with Tab Taxim-O 200mg, Tab Dolo 650mg, Neosporin ointment (5 days). Review: 31.12.2022.'},
+  {date:'2023-01-17', month:'2023-01', dotColor:'#15803d', label:'17 Jan 2023 — OPD',
+   title:'Sebaceous Cyst Scalp — Follow-up',
+   desc:'Post-op review with Dr. Rajkumar. Wound healed well. Review on 31 Jan 2023.'},
+  {date:'2023-11-16', month:'2023-11', dotColor:'#d97706', label:'16 Nov 2023 — Dx Workup',
+   title:'USG Left Breast + Trucut Biopsy (Sri Chakra Scans)',
+   desc:'Lump detected in left breast. USG guided biopsy taken. Left breast nodule ~1D 0.97 cm, 2D 0.71 cm visible. Referred to Dr. Rajkumar for oncology review.'},
+  {date:'2023-12-12', month:'2023-12', dotColor:'#dc2626', label:'12 Dec 2023 — Histopathology + IHC',
+   title:'DIAGNOSIS: Invasive Breast Carcinoma, No Special Type, Grade 3',
+   desc:'HPE (Biopsy No: KMH-2606/23A): USG guided biopsy left breast — features suggestive of Invasive breast carcinoma, NST, Grade 3. IHC (IHC-201/23): ER Positive (90%, strong, Allred 8/8). PR Positive (75%, strong, Allred 8/8). HER2 Positive (3+). Dr. Kala K M.D., DNB (Pathology).'},
+  {date:'2023-12-18', month:'2023-12', dotColor:'#d97706', label:'18 Dec 2023 — Staging',
+   title:'PET CT Scan (Whole Body) + Chest PA View',
+   desc:'PET CT findings: Hypermetabolic mass lesion left breast outer half — biopsy proven carcinoma. Satellite nodule near nipple-areolar complex. Mildly enlarged non-hypermetabolic left Level I axillary lymphnodes (Reactive). No infiltration of skin/muscle/chest wall. No other metabolic active lesions. Chest X-ray: Normal — cardiac shadow normal, both lungs clear, both CP angles free.'},
+  {date:'2023-12-22', month:'2023-12', dotColor:'#d97706', label:'22 Dec 2023 — Pre-op Assessment',
+   title:'Echo (EF 70%, LVH+), Peripheral Smear Study',
+   desc:'Pre-op cardiac fitness for BCS. Echo: Normal chamber dimensions, structurally normal valves, LV hypertrophy positive, no regional wall motion abnormality, LVEF 70%, trivial mitral/pulmonary/tricuspid regurgitation. Peripheral smear: Microcytic hypochromic anaemia for evaluation — suggested serum iron studies.'},
+  {date:'2023-12-27', month:'2023-12', dotColor:'#d97706', label:'27 Dec 2023 — OPD (Internal Medicine)',
+   title:'Anaemia Workup — Iron Carboxy Maltose + Albendazole + Referral GI',
+   desc:'Dr. Joseph Dominic (Ref). Urine RE: Pus cells 2-3/HPF, RBC absent — essentially normal. Prescribed: Inj Iron Carboxy Maltose 500mg IV (single dose), Tab Folvite 5mg OD×7 days, Tab Zentil (Albendazole) 400mg single dose. Plan: Serum ferritin, reticulocyte count (3.2%), USG/colonoscopy referral for chronic blood loss anaemia evaluation.'},
+  {date:'2024-01-04', month:'2024-01', dotColor:'#6366f1', label:'04 Jan 2024 — Surgery #2',
+   title:'BCS (Breast Conserving Surgery) + Sentinel Lymph Node Biopsy (SLNB)',
+   desc:'Admitted 03.01.2024, Surgery 04.01.2024, Discharged 05.01.2024. IP.NO: 72/2024. Surgeons: Dr. Rajkumar P, Dr. Kathiresan N. Anaesthetist: Dr. Rajaprabhu (GA). 5 sentinel nodes harvested — ALL NODES NEGATIVE FOR MALIGNANCY. Margins all around clear. HPE: pT1c, N0 (m), DCIS 4, margin free. Drug allergy confirmed: Tab Ranitidine.'},
+  {date:'2024-01-10', month:'2024-01', dotColor:'#d97706', label:'Jan 2024 — Post-op HPE',
+   title:'BCS Specimen HPE — pT1c N0 (m), DCIS 4, Margins Free',
+   desc:'Lab No: 1559168. Collected 04.01.2024. HPE confirmed invasive carcinoma. pT1c, N0 on frozen section — all sentinel nodes negative. DCIS component 4. Surgical margins all free. Dr. Kala K MD, DNB (Pathology).'},
+  {date:'2024-01-11', month:'2024-01', dotColor:'#15803d', label:'11 Jan 2024 — OPD Review',
+   title:'Post-BCS Follow-up: pT1c N0, Margin Free',
+   desc:'Dr. Rajkumar. HPE confirmed: pT1c N0 (m), DCIS 4, Margins free. Plan: Hereditary Cancer Gene Panel. Review on 17.01.2024.'},
+  {date:'2024-03-06', month:'2024-03', dotColor:'#15803d', label:'06 Mar 2024 — OPD',
+   title:'Chemotherapy Follow-up (2 Cycles Completed)',
+   desc:'Dr. Rajkumar. Ca (L) Breast, BCS done. On Chemo — 2 cycles completed. L) Breast / Axilla — NAD. Review after 3 months. Vitals: HR 84/min, RR 20/min, BP 120/80 mmHg, SpO2 97%. Height 153cm, Weight 68.2 kg.'},
+  {date:'2024-07-10', month:'2024-07', dotColor:'#6366f1', label:'10 Jul 2024 — Radiotherapy Completed',
+   title:'Radiation Oncology Discharge Summary — Adjuvant Radiotherapy Completed',
+   desc:'Completed a 1-month course of adjuvant external beam radiation therapy (from 11 June to 10 July 2024) under Dr. V. Srinivasan at Kamakshi Memorial Hospital. Monaco TPS Monaco IMRT planning, 40Gy to left breast and left SCL, and 10Gy boost in 5 fractions to scar using 6MV photons. Tolerated radiotherapy course well. Stable discharge.'},
+  {date:'2024-07-30', month:'2024-07', dotColor:'#15803d', label:'30 Jul 2024 — Oncology Review + Echo',
+   title:'OPD Oncology Review + 2D Echo surveillance post-RT',
+   desc:'Follow-up assessment after radiotherapy course. 2D Echo showed normal chamber dimensions and normal LV systolic function (LVEF 65%), normal diastolic function, no wall motion abnormalities. Prepared for adjuvant Trastuzumab maintenance (Cycle 9).'},
+  {date:'2024-08-02', month:'2024-08', dotColor:'#d97706', label:'02 Aug 2024 — Thyroid USG-FNAC + Glycemic Check',
+   title:'Thyroid FNAC (Colloid Goiter) + Lab Panel (HbA1c 7.1%)',
+   desc:'Underwent ultrasound-guided FNAC of left thyroid nodule (10 slides cytopathology) by Dr. Madhumita C, showing features of colloid nodule. Blood lab panel showed HbA1c 7.1% (eAG 157 mg/dL) indicating elevated average glucose. Fasting glucose 112.7 mg/dL, PPBS 213.9 mg/dL. Thyroid profile normal (TSH 0.77).'},
+  {date:'2024-09-26', month:'2024-09', dotColor:'#d97706', label:'26 Sep 2024 — USG Abdomen + Pelvis + Echo',
+   title:'USG Abdomen & Pelvis (Grade I Fatty Liver, Polycystic Ovaries) + 2D Echo (LVEF 62%)',
+   desc:'TVS / Abdominal USG by Dr. Sujeeth showed Grade I Fatty Liver and Polycystic Ovaries. 2D Echo by Dr. Srinivasan V confirmed normal chamber dimensions, LVEF 62%, and normal LV systolic function. Supportive medication (Tamoxifen/Dulcolax) ongoing.'},
+  {date:'2024-10-05', month:'2024-10', dotColor:'#d97706', label:'05 Oct 2024 — Haemoglobin Check',
+   title:'Routine blood check — Mild Anaemia',
+   desc:'Hemoglobin was 10.1 g/dL, indicating mild persistent anaemia during Trastuzumab maintenance therapy. Referred by Dr. Joseph Dominic.'},
+  {date:'2024-12-05', month:'2024-12', dotColor:'#d97706', label:'05 Dec 2024 — Glycemic Check',
+   title:'Lab Panel — HbA1c 6.5% (Pre-diabetes / Impaired Glucose Tolerance)',
+   desc:'Biochemistry panel shows HbA1c 6.5% (eAG 139.85 mg/dL), Fasting glucose 118.4 mg/dL, and elevated Postprandial glucose 224.2 mg/dL. Thyroid function normal (TSH 1.23, Free T3 3.40, Free T4 1.09).'},
+  {date:'2024-12-26', month:'2024-12', dotColor:'#d97706', label:'26 Dec 2024 — Cardiac Monitor',
+   title:'2D Echo Colour Doppler — LVEF 74% Surveillance',
+   desc:'Cardiac surveillance during Herceptin therapy. Normal chamber dimensions, structurally normal valves, normal LV systolic function with Grade I diastolic dysfunction (LVEF 74%). No clot or pericardial effusion.'},
+  {date:'2025-01-16', month:'2025-01', dotColor:'#15803d', label:'16 Jan 2025 — BRCA Genetic Test Result',
+   title:'BRCA1 & BRCA2 Genetic Testing — Negative Status',
+   desc:'MedGenome report (Accession 1152919) for 158-gene Hereditary Cancer Panel. No pathogenic or likely pathogenic variants detected. Confirmed BRCA1 and BRCA2 negative, indicating no hereditary predisposition to breast cancer.'},
+  {date:'2025-02-07', month:'2025-02', dotColor:'#d97706', label:'07 Feb 2025 — USG',
+   title:'USG Complete Abdomen with TVS — Grade II Fatty Liver, Thickened Endometrium 13.3mm, Left Ovarian Cysts',
+   desc:'Known case HPE proven invasive carcinoma left breast, BCS 2024, post-chemoradiotherapy. Liver: Grade II fatty liver. Endometrium thickened 13.3 mm with few cystic spaces. Left ovary enlarged (84.3 cc) — two hemorrhagic cysts, septated cyst, simple cyst. Minimal free fluid POD. Reported by Dr. Afrah & Dr. Suhara Shareef.'},
+  {date:'2025-02-12', month:'2025-02', dotColor:'#d97706', label:'12 Feb 2025 — OPD',
+   title:'CA 125 Ovarian Marker (Normal 11.99 U/mL) + Pipelle Bx (Endometrial Sampling)',
+   desc:'Dr. Devi C (Ref). CA 125 Ovarian Cancer Marker: 11.99 U/mL (<35 = Normal). Pipelle biopsy done. Histopathology: Features suggestive of Benign Endometrial Polyp. Reviewed by Dr. Kala K MD and Dr. Sumitha G MD, DCP.'},
+  {date:'2025-02-15', month:'2025-02', dotColor:'#15803d', label:'15 Feb 2025 — OPD',
+   title:'Pipelle Bx Result Review — Benign Endometrial Polyp, Chp Follow-up',
+   desc:'Dr. Rajkumar. Pipelle Bx confirmed Benign Endometrial Polyp. Chp (Chemoprevention/follow-up). Review after 3 months. Vitals: HR 92 bpm, BP 140/70 mmHg, SpO2 97%, Height 153cm. Pain Score: 1/10.'},
+  {date:'2025-05-09', month:'2025-05', dotColor:'#d97706', label:'09 May 2025 — OPD',
+   title:'Ca L Breast IBC Gr.3, Post BCS+Chemo+RT → Tamoxifen, BRCA Negative. Lap Oophorectomy Discussed.',
+   desc:'Dr. Rajkumar. Ca (L) Breast IBC Gr.3, Dec 2023. ER/PR positive, HER2 positive. BCS → Chemo → Radiotherapy → Tamoxifen. BRCA Negative. LMP: 19 Apr 2025. No symptoms. PS-1. Both breasts/axilla NAD. Option: Laparoscopic Oophorectomy given. Review with CA125, Pipelle Bx. BP 160/90 mmHg, HR 110 bpm, SpO2 98%.'},
+  {date:'2026-06-12', month:'2026-06', dotColor:'#d97706', label:'12 Jun 2026 — USG Thyroid + Lab Panel',
+   title:'USG Neck & Thyroid (Multinodular Goiter TIRADS III) + Lab Panel',
+   desc:'USG Neck by Dr. T. P. Ravi shows multinodular goiter (TIRADS III, right lobe nodule 3.8x2.9 cm). Lab panel shows HbA1c 6.4%, FBS 122.4, PPBS 198.6 (impaired glucose tolerance), total cholesterol 170, triglycerides 233.89 (elevated), HDL 37.47 (low), TSH 2.15, Free T3/T4 normal.'},
+  {date:'2026-06-15', month:'2026-06', dotColor:'#6366f1', label:'15 Jun 2026 — Day Care Inj. Triptorelin + OPD Endocrine',
+   title:'OPD Endocrine Review + Day Care Inj. Triptorelin 11.25mg depot',
+   desc:'Admitted for day care administration of depot Inj. Triptorelin 11.25mg IM (GnRH suppression) under Dr. Joseph Dominic. Reviewed for thyroid multinodular goiter by Dr. Geethalakshmi S. Discharged in stable condition.'}];
+
+function renderTl() {
+  var q = (document.getElementById('tl-q').value || '').toLowerCase();
+  var container = document.getElementById('tl-body');
+  var items = TL_ITEMS.filter(function(item) {
+    return !q || (item.label + item.title + item.desc).toLowerCase().indexOf(q) >= 0;
+  });
+  if (items.length === 0) {
+    container.innerHTML = '<div class="empty">No timeline events match.</div>';
+    return;
+  }
+  var h = '';
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    h += '<div class="tc">' +
+      '<div class="tn2" style="background:' + item.dotColor + '"></div>' +
+      '<div class="td2">' + item.label + '</div>' +
+      '<div class="tt2">' + item.title + '</div>' +
+      '<div class="td3">' + item.desc + '</div>' +
+      '</div>';
+  }
+  container.innerHTML = h;
+}
+
+/* ===== INIT ===== */
+document.addEventListener('DOMContentLoaded', function() {
+  if (theme === 'dark') document.getElementById('tbtn').textContent = '\u2600\uFE0F';
+
+  // PDF iframe loader check removed (replaced with direct image loading)
+
+  renderPages();
+  runSearch();
+  buildLabMap();
+  renderLab();
+  renderTl();
+
+  // Load the first page of the PDF by default (which is now the earliest date!)
+  goPage(1);
+});
 </script>
 </body>
 </html>
